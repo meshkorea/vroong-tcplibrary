@@ -32,7 +32,7 @@ public class FixedByteFormatter implements Formatter {
           if (component instanceof Item) {
             fragment = formatFor(component);
           } else {
-            fragment = doFormat(((Packet)component).getMessageComponents());
+            fragment = doFormat(((Packet) component).getMessageComponents());
           }
 
           formatted.append(fragment);

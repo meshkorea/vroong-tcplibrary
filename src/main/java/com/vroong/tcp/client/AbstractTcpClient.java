@@ -29,7 +29,8 @@ public abstract class AbstractTcpClient implements TcpClient {
     return createSocket(host, port, connectionTimeout, readTimeout);
   }
 
-  protected Socket createSocket(String host, int port, int connectionTimeout, int readTimeout) throws Exception {
+  protected Socket createSocket(String host, int port, int connectionTimeout, int readTimeout)
+      throws Exception {
     final Socket socket = new Socket();
     // Java 소켓 옵션 설정하기 @see https://cbts.tistory.com/125
     socket.setSoTimeout(readTimeout); // read() 메서드가 블록킹할 시간
@@ -42,7 +43,8 @@ public abstract class AbstractTcpClient implements TcpClient {
       socket.connect(new InetSocketAddress(host, port), connectionTimeout);
       if (socket.isConnected()) {
         if (log.isDebugEnabled()) {
-          log.debug("Connected to {}, srcPort={}", socket.getRemoteSocketAddress(), socket.getLocalPort());
+          log.debug("Connected to {}, srcPort={}", socket.getRemoteSocketAddress(),
+              socket.getLocalPort());
         }
       } else {
         throw new SocketConnectionFailedException(
@@ -51,7 +53,8 @@ public abstract class AbstractTcpClient implements TcpClient {
     } catch (IOException e) {
       log.error(String.format("Connection to %s failed", socket.getRemoteSocketAddress()), e);
       throw new SocketConnectionFailedException(
-          String.format("Connection to %s failed: %s", socket.getRemoteSocketAddress(), e.getMessage()), e);
+          String.format("Connection to %s failed: %s", socket.getRemoteSocketAddress(),
+              e.getMessage()), e);
     }
 
     return socket;

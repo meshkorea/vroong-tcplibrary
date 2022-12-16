@@ -24,6 +24,7 @@ public class TcpClientProperties {
   @Getter
   @Setter
   public static class Pool {
+
     final int minIdle = 10;
     final int maxIdle = 10;
     final int maxTotal = 100;

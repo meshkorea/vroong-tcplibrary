@@ -29,9 +29,12 @@ public class PooledTcpClient extends AbstractTcpClient {
 
   public PooledTcpClient(String host, int port, Charset charset, int minIdle, int maxIdle, int maxTotal) {
     final GenericObjectPoolConfig<Tuple> config = new GenericObjectPoolConfig<>();
-    config.setMinIdle(minIdle);     // org.apache.commons.pool2.impl.GenericObjectPoolConfig.DEFAULT_MIN_IDLE = 0
-    config.setMaxIdle(maxIdle);     // org.apache.commons.pool2.impl.GenericObjectPoolConfig.DEFAULT_MAX_IDLE = 8
-    config.setMaxTotal(maxTotal);   // org.apache.commons.pool2.impl.GenericObjectPoolConfig.DEFAULT_MAX_TOTAL = 8
+    // org.apache.commons.pool2.impl.GenericObjectPoolConfig.DEFAULT_MIN_IDLE = 0
+    config.setMinIdle(minIdle);
+    // org.apache.commons.pool2.impl.GenericObjectPoolConfig.DEFAULT_MAX_IDLE = 8
+    config.setMaxIdle(maxIdle);
+    // org.apache.commons.pool2.impl.GenericObjectPoolConfig.DEFAULT_MAX_TOTAL = 8
+    config.setMaxTotal(maxTotal);
     config.setTestOnBorrow(true);
     config.setTestWhileIdle(true);
 
