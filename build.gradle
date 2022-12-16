@@ -1,13 +1,14 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '2.7.5'
-	id 'io.spring.dependency-management' version '1.0.15.RELEASE'
 	id 'io.freefair.lombok' version '6.3.0'
+	id 'maven-publish'
 }
 
-group = 'dev.appkr'
+group = 'com.vroong'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '17'
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+archivesBaseName = 'vroong-tcplibrary'
 
 configurations {
 	compileOnly {
@@ -19,15 +20,46 @@ repositories {
 	mavenCentral()
 }
 
-dependencies {
-	implementation 'org.apache.commons:commons-pool2:2.11.1'
-
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+jar {
+	enabled = true
+	from sourceSets.main.output
 }
 
-tasks.named('test') {
-	useJUnitPlatform()
-	systemProperty('spring.profiles.active', 'test')
+java {
+	withJavadocJar()
+	withSourcesJar()
+}
+
+publishing {
+	publications {
+		maven(MavenPublication) {
+			artifactId = archivesBaseName
+			from components.java
+		}
+	}
+	repositories {
+		maven {
+			def releasesRepoUrl = "https://nexus.mm.meshkorea.net/repository/maven-releases/"
+			def snapshotsRepoUrl = "https://nexus.mm.meshkorea.net/repository/maven-snapshots/"
+			url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+			credentials {
+				username repoUser
+				password repoPass
+			}
+		}
+	}
+}
+
+def loggers = [
+		'org.slf4j:slf4j-api:1.7.32',
+		'org.slf4j:log4j-over-slf4j:1.7.32',
+		'ch.qos.logback:logback-core:1.2.9',
+		'ch.qos.logback:logback-classic:1.2.9'
+]
+
+dependencies {
+	implementation 'org.apache.commons:commons-pool2:2.11.1'
+	implementation loggers
+	testImplementation loggers
+	testImplementation 'org.junit.jupiter:junit-jupiter:5.8.2'
 }
