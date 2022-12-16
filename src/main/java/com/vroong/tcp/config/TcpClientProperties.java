@@ -2,7 +2,6 @@ package com.vroong.tcp.config;
 
 import static com.vroong.tcp.utils.PropertyUtils.getClientPropertiesValue;
 
-import java.io.FileNotFoundException;
 import java.nio.charset.Charset;
 import java.util.Map;
 import lombok.AccessLevel;
@@ -26,18 +25,14 @@ public class TcpClientProperties {
   }
 
   public TcpClientProperties() {
-    try {
-      Map<String, Object> propertiesMap = getClientPropertiesValue();
-      if (propertiesMap != null) {
-        this.host = (String) propertiesMap.get("host");
-        this.port = (Integer) propertiesMap.get("port");
-        this.connectionTimeout = (Integer) propertiesMap.get("connectionTimeout");
-        this.readTimeout = (Integer) propertiesMap.get("readTimeout");
-        this.charset = (String) propertiesMap.get("charset");
-        this.pool = (Pool) propertiesMap.get("pool");
-      }
-    } catch (FileNotFoundException e) {
-      e.printStackTrace();
+    Map<String, Object> propertiesMap = getClientPropertiesValue();
+    if (propertiesMap != null) {
+      this.host = (String) propertiesMap.get("host");
+      this.port = (Integer) propertiesMap.get("port");
+      this.connectionTimeout = (Integer) propertiesMap.get("connectionTimeout");
+      this.readTimeout = (Integer) propertiesMap.get("readTimeout");
+      this.charset = (String) propertiesMap.get("charset");
+      this.pool = (Pool) propertiesMap.get("pool");
     }
   }
 

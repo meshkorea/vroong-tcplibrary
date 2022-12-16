@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import com.vroong.tcp.client.PooledTcpClient.Tuple;
 import com.vroong.tcp.config.TcpClientProperties;
 import com.vroong.tcp.config.TcpClientProperties.Pool;
+import com.vroong.tcp.config.TcpServerProperties;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -108,5 +109,11 @@ class TcpClientTest {
     // private method에 접근하기 위해 Reflection 사용
     final Method method = ReflectionUtils.findMethod(client.getClass(), "getPool").get();
     return (ObjectPool<Tuple>) ReflectionUtils.invokeMethod(method, client);
+  }
+
+  @Test
+  public void t() throws Exception {
+    TcpServerProperties tcpServerProperties = new TcpServerProperties();
+    log.info(tcpServerProperties.toString());
   }
 }

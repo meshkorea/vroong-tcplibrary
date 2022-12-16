@@ -5,19 +5,23 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.HashMap;
 import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 import org.yaml.snakeyaml.Yaml;
 
+@Slf4j
 public class PropertyUtils {
 
   private static final String TCP_CONFIG_YAML_PATH =
       System.getProperty("user.dir") + "/src/main/resources/" + "tcp_config.yml";
 
-  public static Map<String, Object> getServerPropertiesValue() throws FileNotFoundException {
-    Map<String, Object> propMap =
-        new Yaml().load(new FileReader(TCP_CONFIG_YAML_PATH));
-    Map<String, Object> parameterMap = new HashMap<>();
-    Object tcp = propMap.get("tcp");
+  public static Map<String, Object> getServerPropertiesValue() {
+    Map<String, Object> propMap = getPropMap();
+    if (propMap == null) {
+      return null;
+    }
 
+    Object tcp = propMap.get("tcp");
+    Map<String, Object> parameterMap = new HashMap<>();
     if (tcp instanceof Map) {
       Map<String, Object> tcpMap = (Map<String, Object>) tcp;
       Object server = tcpMap.get("server");
@@ -43,11 +47,14 @@ public class PropertyUtils {
     return null;
   }
 
-  public static Map<String, Object> getClientPropertiesValue() throws FileNotFoundException {
-    Map<String, Object> propMap = new Yaml().load(new FileReader(TCP_CONFIG_YAML_PATH));
-    Map<String, Object> parameterMap = new HashMap<>();
-    Object tcp = propMap.get("tcp");
+  public static Map<String, Object> getClientPropertiesValue() {
+    Map<String, Object> propMap = getPropMap();
+    if (propMap == null) {
+      return null;
+    }
 
+    Object tcp = propMap.get("tcp");
+    Map<String, Object> parameterMap = new HashMap<>();
     if (tcp instanceof Map) {
       Map<String, Object> tcpMap = (Map<String, Object>) tcp;
       Object client = tcpMap.get("client");
@@ -87,5 +94,19 @@ public class PropertyUtils {
     }
 
     return null;
+  }
+
+  private static Map<String, Object> getPropMap() {
+    Map<String, Object> propMap = null;
+    try {
+      propMap = new Yaml().load(new FileReader(TCP_CONFIG_YAML_PATH));
+    } catch (FileNotFoundException e) {
+      log.error(e.getMessage());
+    }
+
+    if (propMap == null) {
+      return null;
+    }
+    return propMap;
   }
 }
