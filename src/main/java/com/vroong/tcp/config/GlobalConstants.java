@@ -1,4 +1,4 @@
-package com.vroong.config;
+package com.vroong.tcp.config;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
