@@ -1,6 +1,10 @@
 package com.vroong.tcp.config;
 
+import static com.vroong.tcp.utils.PropertyUtils.getClientPropertiesValue;
+
+import java.io.FileNotFoundException;
 import java.nio.charset.Charset;
+import java.util.Map;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
@@ -9,24 +13,49 @@ import lombok.Setter;
 @Data
 public class TcpClientProperties {
 
-  final String host = "localhost";
-  final int port = 65535;
-  final int connectionTimeout = 1_000; // millis
-  final int readTimeout = 5_000; // millis
+  String host = "localhost";
+  int port = 65535;
+  int connectionTimeout = 1_000; // millis
+  int readTimeout = 5_000; // millis
   @Getter(AccessLevel.NONE)
-  final String charset = "utf-8";
-  final Pool pool = new Pool();
+  String charset = "utf-8";
+  Pool pool = new Pool();
 
   public Charset getCharset() {
     return Charset.forName(charset);
+  }
+
+  public TcpClientProperties() {
+    try {
+      Map<String, Object> propertiesMap = getClientPropertiesValue();
+      if (propertiesMap != null) {
+        this.host = (String) propertiesMap.get("host");
+        this.port = (Integer) propertiesMap.get("port");
+        this.connectionTimeout = (Integer) propertiesMap.get("connectionTimeout");
+        this.readTimeout = (Integer) propertiesMap.get("readTimeout");
+        this.charset = (String) propertiesMap.get("charset");
+        this.pool = (Pool) propertiesMap.get("pool");
+      }
+    } catch (FileNotFoundException e) {
+      e.printStackTrace();
+    }
   }
 
   @Getter
   @Setter
   public static class Pool {
 
-    final int minIdle = 10;
-    final int maxIdle = 10;
-    final int maxTotal = 100;
+    int minIdle = 10;
+    int maxIdle = 10;
+    int maxTotal = 100;
+
+    public Pool() {
+    }
+
+    public Pool(int minIdle, int maxIdle, int maxTotal) {
+      this.minIdle = minIdle;
+      this.maxIdle = maxIdle;
+      this.maxTotal = maxTotal;
+    }
   }
 }
