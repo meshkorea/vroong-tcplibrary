@@ -110,10 +110,4 @@ class TcpClientTest {
     final Method method = ReflectionUtils.findMethod(client.getClass(), "getPool").get();
     return (ObjectPool<Tuple>) ReflectionUtils.invokeMethod(method, client);
   }
-
-  @Test
-  public void t() throws Exception {
-    TcpServerProperties tcpServerProperties = new TcpServerProperties();
-    log.info(tcpServerProperties.toString());
-  }
 }
