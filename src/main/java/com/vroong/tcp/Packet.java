@@ -4,7 +4,7 @@ import static java.util.function.Function.identity;
 
 import com.vroong.tcp.visitor.Formattable;
 import com.vroong.tcp.visitor.Formatter;
-import com.vroong.tcp.visitor.Parceable;
+import com.vroong.tcp.visitor.Parseable;
 import com.vroong.tcp.visitor.Parser;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +19,7 @@ import lombok.ToString;
 @Setter
 @EqualsAndHashCode
 @ToString(of = {"messageComponents"})
-public class Packet implements Parceable, Formattable, TcpMessage {
+public class Packet implements Parseable, Formattable, TcpMessage {
 
   private List<TcpMessage> messageComponents = new ArrayList<>();
 

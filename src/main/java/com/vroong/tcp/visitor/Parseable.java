@@ -1,6 +1,6 @@
 package com.vroong.tcp.visitor;
 
-public interface Parceable {
+public interface Parseable {
 
   void accept(Parser parser);
 }

@@ -26,7 +26,7 @@ public class FixedByteFormatter implements Formatter {
 
   private String doFormat(List<TcpMessage> components) {
     final StringBuilder formatted = new StringBuilder();
-    components.stream()
+    components
         .forEach(component -> {
           String fragment = "";
           if (component instanceof Item) {

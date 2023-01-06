@@ -14,7 +14,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
-import javax.annotation.PreDestroy;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,8 +24,7 @@ public abstract class AbstractTcpServer {
   protected final ExecutorService executor;
 
   protected final AtomicReference<ServerSocket> serverSocketHolder = new AtomicReference<>();
-  protected final AtomicReference<List<Socket>> socketHolder = new AtomicReference<>(
-      new ArrayList<>());
+  protected final AtomicReference<List<Socket>> socketHolder = new AtomicReference<>(new ArrayList<>());
 
   public AbstractTcpServer(TcpServerProperties properties) {
     this.port = properties.getPort();
@@ -47,19 +45,13 @@ public abstract class AbstractTcpServer {
       log.info("A connection established to port {}", socket.getPort());
 
       CompletableFuture.runAsync(() -> {
-        PrintWriter writer = null;
-        BufferedReader reader = null;
-        try {
-          writer = new PrintWriter(socket.getOutputStream(), true);
-          reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-
+        try (PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
           handleMessage(reader, writer);
         } catch (IOException e) {
           log.warn("{}: {}", e.getMessage(), socket.getPort());
         } finally {
           try {
-            reader.close();
-            writer.close();
             socket.close();
           } catch (IOException e) {
             log.error(String.format("Connection to port %s was not closed", socket.getPort()));
@@ -69,7 +61,6 @@ public abstract class AbstractTcpServer {
     }
   }
 
-  @PreDestroy
   @SneakyThrows
   public void stop() {
     if (socketHolder != null) {

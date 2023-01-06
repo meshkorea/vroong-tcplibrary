@@ -10,7 +10,7 @@ import lombok.Setter;
 public class TcpClientProperties {
 
   final String host = "localhost";
-  final int port = 65535;
+  final int port = 65_535;
   final int connectionTimeout = 1_000; // millis
   final int readTimeout = 5_000; // millis
   @Getter(AccessLevel.NONE)
