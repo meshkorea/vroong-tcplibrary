@@ -40,8 +40,7 @@ class TcpClientTest {
   @Test
   void pooledTcpClient() throws Exception {
     final TcpClient client = new PooledTcpClient(properties.getHost(), properties.getPort(),
-        properties.getCharset(), poolConfig.getMinIdle(), poolConfig.getMaxIdle(),
-        poolConfig.getMaxTotal());
+        properties.getCharset(), poolConfig.getMinIdle(), poolConfig.getMaxIdle(), poolConfig.getMaxTotal());
 
     final ObjectPool<Tuple> pool = getPool(client);
     assertEquals(poolConfig.getMinIdle(), pool.getNumIdle());
@@ -63,8 +62,7 @@ class TcpClientTest {
     // spring-data-redis 등도 apache.commons.pool2를 사용함
   void pooledTcpClient_underMultiThreads() {
     final TcpClient client = new PooledTcpClient(properties.getHost(), properties.getPort(),
-        properties.getCharset(), poolConfig.getMinIdle(), poolConfig.getMaxIdle(),
-        poolConfig.getMaxTotal());
+        properties.getCharset(), poolConfig.getMinIdle(), poolConfig.getMaxIdle(), poolConfig.getMaxTotal());
     final ObjectPool<Tuple> pool = getPool(client);
     final int noOfTests = poolConfig.getMaxTotal();
     final Executor executor = Executors.newFixedThreadPool(noOfTests);
@@ -94,11 +92,12 @@ class TcpClientTest {
       }
     }
 
-    futures.stream().forEach(f -> {
-      try {
-        log.info("response: {}", new String(f.get(), properties.getCharset()));
-      } catch (Exception e) {
-      }
+    futures
+      .forEach(f -> {
+        try {
+          log.info("response: {}", new String(f.get(), properties.getCharset()));
+        } catch (Exception ignored) {
+        }
     });
 
     log.info("All done, pool state: numIdle={}, numActive={}", pool.getNumIdle(), pool.getNumActive());

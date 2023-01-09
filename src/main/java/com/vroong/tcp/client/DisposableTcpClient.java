@@ -1,8 +1,9 @@
 package com.vroong.tcp.client;
 
+import com.vroong.tcp.TcpUtils;
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.Charset;
@@ -16,7 +17,7 @@ public class DisposableTcpClient extends AbstractTcpClient {
 
   private Socket socket;
   private OutputStream writer;
-  private BufferedReader reader;
+  private InputStream reader;
 
   public DisposableTcpClient(String host, int port, Charset charset) {
     this.host = host;
@@ -34,12 +35,12 @@ public class DisposableTcpClient extends AbstractTcpClient {
 
   @Override
   public byte[] read() throws Exception {
-    reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), charset));
-    final String tmp = reader.readLine();
+    reader = new BufferedInputStream(socket.getInputStream());
+    final byte[] rawMessage = TcpUtils.readLine(reader);
 
     clearResources();
 
-    return (tmp != null) ? tmp.getBytes(charset) : new byte[]{};
+    return rawMessage;
   }
 
   private void clearResources() throws Exception {

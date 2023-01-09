@@ -1,8 +1,9 @@
 package com.vroong.tcp.server;
 
+import com.vroong.tcp.TcpUtils;
 import com.vroong.tcp.config.TcpServerProperties;
-import java.io.BufferedReader;
-import java.io.PrintWriter;
+import java.io.InputStream;
+import java.io.OutputStream;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -13,12 +14,16 @@ public class EchoServer extends AbstractTcpServer {
     super(properties);
   }
 
+  public static void main(String[] args) {
+    new EchoServer(new TcpServerProperties()).start();
+  }
+
   @SneakyThrows
   @Override
-  public void handleMessage(BufferedReader reader, PrintWriter writer) {
-    String message;
-    while ((message = reader.readLine()) != null) {
-      writer.println(message);
-    }
+  public void handleMessage(InputStream reader, OutputStream writer) {
+    final byte[] buffer = TcpUtils.readLine(reader);
+
+    writer.write(buffer);
+    writer.flush();
   }
 }

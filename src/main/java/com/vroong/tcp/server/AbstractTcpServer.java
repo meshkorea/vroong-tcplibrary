@@ -1,10 +1,11 @@
 package com.vroong.tcp.server;
 
 import com.vroong.tcp.config.TcpServerProperties;
-import java.io.BufferedReader;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -31,7 +32,7 @@ public abstract class AbstractTcpServer {
     this.executor = Executors.newFixedThreadPool(properties.getMaxConnection());
   }
 
-  public abstract void handleMessage(BufferedReader reader, PrintWriter writer);
+  public abstract void handleMessage(InputStream reader, OutputStream writer);
 
   @SneakyThrows
   public void start() {
@@ -45,8 +46,9 @@ public abstract class AbstractTcpServer {
       log.info("A connection established to port {}", socket.getPort());
 
       CompletableFuture.runAsync(() -> {
-        try (PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
+        try (BufferedInputStream reader = new BufferedInputStream(socket.getInputStream());
+            BufferedOutputStream writer = new BufferedOutputStream(socket.getOutputStream())) {
+
           handleMessage(reader, writer);
         } catch (IOException e) {
           log.warn("{}: {}", e.getMessage(), socket.getPort());
