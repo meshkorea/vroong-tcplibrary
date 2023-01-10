@@ -3,7 +3,6 @@ package com.vroong.tcp.client;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.nio.charset.Charset;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -15,9 +14,6 @@ public abstract class AbstractTcpClient implements TcpClient {
 
   @Setter
   protected int readTimeout = 5_000;
-
-  @Setter
-  protected Charset charset;
 
   @Override
   public abstract void write(byte[] message) throws Exception;

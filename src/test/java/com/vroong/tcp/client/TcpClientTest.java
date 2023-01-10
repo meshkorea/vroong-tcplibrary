@@ -27,8 +27,7 @@ class TcpClientTest {
 
   @Test
   void disposableTcpClient() throws Exception {
-    final TcpClient client = new DisposableTcpClient(properties.getHost(), properties.getPort(),
-        properties.getCharset());
+    final TcpClient client = new DisposableTcpClient(properties.getHost(), properties.getPort());
 
     final String message = "안녕하세요?\n";
     client.write(message.getBytes(properties.getCharset()));
@@ -40,7 +39,7 @@ class TcpClientTest {
   @Test
   void pooledTcpClient() throws Exception {
     final TcpClient client = new PooledTcpClient(properties.getHost(), properties.getPort(),
-        properties.getCharset(), poolConfig.getMinIdle(), poolConfig.getMaxIdle(), poolConfig.getMaxTotal());
+        poolConfig.getMinIdle(), poolConfig.getMaxIdle(), poolConfig.getMaxTotal());
 
     final ObjectPool<Tuple> pool = getPool(client);
     assertEquals(poolConfig.getMinIdle(), pool.getNumIdle());
@@ -62,7 +61,7 @@ class TcpClientTest {
     // spring-data-redis 등도 apache.commons.pool2를 사용함
   void pooledTcpClient_underMultiThreads() {
     final TcpClient client = new PooledTcpClient(properties.getHost(), properties.getPort(),
-        properties.getCharset(), poolConfig.getMinIdle(), poolConfig.getMaxIdle(), poolConfig.getMaxTotal());
+        poolConfig.getMinIdle(), poolConfig.getMaxIdle(), poolConfig.getMaxTotal());
     final ObjectPool<Tuple> pool = getPool(client);
     final int noOfTests = poolConfig.getMaxTotal();
     final Executor executor = Executors.newFixedThreadPool(noOfTests);

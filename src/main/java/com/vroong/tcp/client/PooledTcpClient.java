@@ -6,7 +6,6 @@ import java.io.BufferedOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.nio.charset.Charset;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -28,7 +27,7 @@ public class PooledTcpClient extends AbstractTcpClient {
 
   private Tuple currentTuple;
 
-  public PooledTcpClient(String host, int port, Charset charset, int minIdle, int maxIdle, int maxTotal) {
+  public PooledTcpClient(String host, int port, int minIdle, int maxIdle, int maxTotal) {
 
     final GenericObjectPoolConfig<Tuple> config = new GenericObjectPoolConfig<>();
     // org.apache.commons.pool2.impl.GenericObjectPoolConfig.DEFAULT_MIN_IDLE = 0
@@ -75,8 +74,6 @@ public class PooledTcpClient extends AbstractTcpClient {
     } catch (Exception e) {
       log.error(String.format("Socket add failed: %s", e.getMessage()), e);
     }
-
-    this.charset = charset;
   }
 
   @Override

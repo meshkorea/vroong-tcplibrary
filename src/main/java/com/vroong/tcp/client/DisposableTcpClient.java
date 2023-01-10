@@ -6,7 +6,6 @@ import java.io.BufferedOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.nio.charset.Charset;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -19,10 +18,9 @@ public class DisposableTcpClient extends AbstractTcpClient {
   private OutputStream writer;
   private InputStream reader;
 
-  public DisposableTcpClient(String host, int port, Charset charset) {
+  public DisposableTcpClient(String host, int port) {
     this.host = host;
     this.port = port;
-    this.charset = charset;
   }
 
   @Override
