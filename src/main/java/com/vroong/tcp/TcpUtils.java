@@ -1,5 +1,6 @@
 package com.vroong.tcp;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -24,17 +25,17 @@ public class TcpUtils {
 
   public static byte[] readLine(InputStream reader) throws IOException {
     byte[] buffer = new byte[8192]; // InputStream DEFAULT_BUFFER_SIZE
-    int totalSize = 0;
-    int currentSize = 0;
+    int receivedSize = 0;
 
-    while (EOF != (currentSize = reader.read(buffer))) {
-      totalSize += currentSize;
+    final ByteArrayOutputStream received = new ByteArrayOutputStream();
+    while (EOF != (receivedSize = reader.read(buffer))) {
+      received.write(buffer, 0, receivedSize);
+
       if (containsNewLine(buffer)) {
-        totalSize -= 1; // "\n" size 제외
-        break;
+        return Arrays.copyOf(received.toByteArray(), received.size() - 1); // "\n" size 제외
       }
     }
 
-    return Arrays.copyOfRange(buffer, 0, totalSize); // byte array padding 제거
+    return received.toByteArray();
   }
 }
