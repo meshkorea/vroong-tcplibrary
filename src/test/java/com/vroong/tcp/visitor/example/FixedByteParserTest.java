@@ -1,11 +1,14 @@
 package com.vroong.tcp.visitor.example;
 
+import static com.vroong.tcp.config.GlobalConstants.DEFAULT_CHARSET;
+
 import com.vroong.tcp.Item;
 import com.vroong.tcp.Packet;
 import com.vroong.tcp.TcpMessage;
 import com.vroong.tcp.TcpMessageTemplateFactory;
 import com.vroong.tcp.config.TcpClientProperties;
 import com.vroong.tcp.visitor.Parser;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
@@ -15,6 +18,8 @@ import org.junit.jupiter.api.Test;
 @Slf4j
 class FixedByteParserTest {
 
+  static final Charset charset = DEFAULT_CHARSET;
+
   final TcpClientProperties properties = new TcpClientProperties();
 
   @Test
@@ -23,7 +28,7 @@ class FixedByteParserTest {
     final String tcpMessage = "020000022020030417050900001053202003041705093049900000000000078006272007000008000124900200000150000000150000000000000000000000080001089002000002500000002500000000000000000000000088100830010000000200000000200000000000000000880111778440900100000150000000150000000000000000004001686301555003000001500000003000000000000000000088010137700870030000029000000058000000000000000000000008000126300200000150000000150000000000000000000000000000000000000000000000000■ 고객주소: 대치4동 890-12 12층                 ■ 고객요청사항:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       050218031961   1800-8255      ";
 
     // when
-    final Packet packet = new Packet("root", tcpMessage.getBytes(properties.getCharset()));
+    final Packet packet = new Packet("root", tcpMessage.getBytes(charset));
     final TcpMessageTemplateFactory templateFactory = new FixedByteTcpMessageTemplateFactory();
     final Parser parser = new FixedByteParser(templateFactory);
     packet.accept(parser);
@@ -123,7 +128,7 @@ class FixedByteParserTest {
      */
 
     final int noOfSubPacket = ((FixedByteTcpMessageTemplateFactory) templateFactory)
-        .getNoOfSubPacket(tcpMessage.getBytes(properties.getCharset()));
+        .getNoOfSubPacket(tcpMessage.getBytes(charset));
     IntStream.range(0, noOfSubPacket)
         .mapToObj(String::valueOf)
         .forEach(subPacketIndex -> {

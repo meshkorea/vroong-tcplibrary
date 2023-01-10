@@ -1,19 +1,48 @@
 package com.vroong.tcp.client;
 
+import com.vroong.tcp.config.TcpClientProperties;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import javax.net.SocketFactory;
+import javax.net.ssl.SSLSocketFactory;
+import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public abstract class AbstractTcpClient implements TcpClient {
 
-  @Setter
-  protected int connectionTimeout = 1_000;
+  @Getter
+  private String host;
+
+  @Getter
+  private int port;
 
   @Setter
-  protected int readTimeout = 5_000;
+  protected int connectionTimeout;
+
+  @Setter
+  protected int readTimeout;
+
+  private final SocketFactory socketFactory;
+
+  public AbstractTcpClient(TcpClientProperties properties, boolean useTLS) {
+    this.host = properties.getHost();
+    this.port = properties.getPort();
+    this.connectionTimeout = properties.getConnectionTimeout();
+    this.readTimeout = properties.getReadTimeout();
+    if (useTLS) {
+      System.setProperty("javax.net.ssl.trustStore", properties.getTrustStore());
+      System.setProperty("javax.net.ssl.trustStorePassword", properties.getTrustStorePassword());
+      System.setProperty("javax.net.ssl.trustStoreType", "JKS");
+
+      System.setProperty("javax.net.ssl.keyStore", properties.getKeyStore());
+      System.setProperty("javax.net.ssl.keyStorePassword", properties.getKeyStorePassword());
+//      System.setProperty("javax.net.debug", "all");
+    }
+    this.socketFactory = useTLS ? SSLSocketFactory.getDefault() : SocketFactory.getDefault();
+  }
 
   @Override
   public abstract void write(byte[] message) throws Exception;
@@ -21,13 +50,9 @@ public abstract class AbstractTcpClient implements TcpClient {
   @Override
   public abstract byte[] read() throws Exception;
 
-  protected Socket createSocket(String host, int port) throws Exception {
-    return createSocket(host, port, connectionTimeout, readTimeout);
-  }
-
-  protected Socket createSocket(String host, int port, int connectionTimeout, int readTimeout)
+  protected Socket createSocket()
       throws Exception {
-    final Socket socket = new Socket();
+    final Socket socket = socketFactory.createSocket();
     // Java 소켓 옵션 설정하기 @see https://cbts.tistory.com/125
     socket.setSoTimeout(readTimeout); // read() 메서드가 블록킹할 시간
     socket.setSoLinger(true, 0);      // 소켓이 닫히면 전송되지 않은 소켓은 버린다

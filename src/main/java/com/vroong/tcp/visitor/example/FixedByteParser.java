@@ -1,12 +1,13 @@
 package com.vroong.tcp.visitor.example;
 
+import static com.vroong.tcp.config.GlobalConstants.DEFAULT_CHARSET;
+
 import com.vroong.tcp.Item;
 import com.vroong.tcp.Packet;
 import com.vroong.tcp.TcpMessage;
 import com.vroong.tcp.TcpMessageTemplateFactory;
 import com.vroong.tcp.visitor.Parser;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import lombok.Setter;
@@ -14,7 +15,7 @@ import lombok.Setter;
 public class FixedByteParser implements Parser {
 
   @Setter
-  private Charset charset = StandardCharsets.UTF_8;
+  private Charset charset = DEFAULT_CHARSET;
 
   private final TcpMessageTemplateFactory templateFactory;
 

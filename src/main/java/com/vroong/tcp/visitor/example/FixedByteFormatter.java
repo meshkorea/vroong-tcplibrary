@@ -1,18 +1,19 @@
 package com.vroong.tcp.visitor.example;
 
+import static com.vroong.tcp.config.GlobalConstants.DEFAULT_CHARSET;
+
 import com.vroong.tcp.Item;
 import com.vroong.tcp.Packet;
 import com.vroong.tcp.TcpMessage;
 import com.vroong.tcp.visitor.Formatter;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import lombok.Setter;
 
 public class FixedByteFormatter implements Formatter {
 
   @Setter
-  private Charset charset = StandardCharsets.UTF_8;
+  private Charset charset = DEFAULT_CHARSET;
 
   @Setter
   private String leftPadding = "0";

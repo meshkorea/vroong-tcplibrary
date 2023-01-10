@@ -1,6 +1,7 @@
 package com.vroong.tcp.client;
 
 import com.vroong.tcp.TcpUtils;
+import com.vroong.tcp.config.TcpClientProperties;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.InputStream;
@@ -27,22 +28,13 @@ public class PooledTcpClient extends AbstractTcpClient {
 
   private Tuple currentTuple;
 
-  public PooledTcpClient(String host, int port, int minIdle, int maxIdle, int maxTotal) {
+  public PooledTcpClient(TcpClientProperties properties, boolean useTLS) {
+    super(properties, useTLS);
 
-    final GenericObjectPoolConfig<Tuple> config = new GenericObjectPoolConfig<>();
-    // org.apache.commons.pool2.impl.GenericObjectPoolConfig.DEFAULT_MIN_IDLE = 0
-    config.setMinIdle(minIdle);
-    // org.apache.commons.pool2.impl.GenericObjectPoolConfig.DEFAULT_MAX_IDLE = 8
-    config.setMaxIdle(maxIdle);
-    // org.apache.commons.pool2.impl.GenericObjectPoolConfig.DEFAULT_MAX_TOTAL = 8
-    config.setMaxTotal(maxTotal);
-    config.setTestOnBorrow(true);
-    config.setTestWhileIdle(true);
-
-    final PooledObjectFactory<Tuple> factory = new BasePooledObjectFactory<Tuple>() {
+    final PooledObjectFactory<Tuple> poolFactory = new BasePooledObjectFactory<Tuple>() {
       @Override
       public Tuple create() throws Exception {
-        final Socket socket = createSocket(host, port, connectionTimeout, readTimeout);
+        final Socket socket = createSocket();
         final BufferedOutputStream writer = new BufferedOutputStream(socket.getOutputStream());
         final BufferedInputStream reader = new BufferedInputStream(socket.getInputStream());
 
@@ -68,9 +60,19 @@ public class PooledTcpClient extends AbstractTcpClient {
       }
     };
 
-    this.pool = new GenericObjectPool<>(factory, config);
+    final GenericObjectPoolConfig<Tuple> poolConfig = new GenericObjectPoolConfig<>();
+    // org.apache.commons.pool2.impl.GenericObjectPoolConfig.DEFAULT_MIN_IDLE = 0
+    poolConfig.setMinIdle(properties.getPool().getMinIdle());
+    // org.apache.commons.pool2.impl.GenericObjectPoolConfig.DEFAULT_MAX_IDLE = 8
+    poolConfig.setMaxIdle(properties.getPool().getMaxIdle());
+    // org.apache.commons.pool2.impl.GenericObjectPoolConfig.DEFAULT_MAX_TOTAL = 8
+    poolConfig.setMaxTotal(properties.getPool().getMaxTotal());
+    poolConfig.setTestOnBorrow(true);
+    poolConfig.setTestWhileIdle(true);
+
+    this.pool = new GenericObjectPool<>(poolFactory, poolConfig);
     try {
-      this.pool.addObjects(minIdle);
+      this.pool.addObjects(properties.getPool().getMinIdle());
     } catch (Exception e) {
       log.error(String.format("Socket add failed: %s", e.getMessage()), e);
     }

@@ -1,7 +1,5 @@
 package com.vroong.tcp.config;
 
-import java.nio.charset.Charset;
-import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,17 +7,19 @@ import lombok.Setter;
 @Data
 public class TcpClientProperties {
 
-  final String host = "localhost";
-  final int port = 65_535;
-  final int connectionTimeout = 1_000; // millis
-  final int readTimeout = 5_000; // millis
-  @Getter(AccessLevel.NONE)
-  final String charset = "utf-8";
-  final Pool pool = new Pool();
-
-  public Charset getCharset() {
-    return Charset.forName(charset);
-  }
+  String host = "localhost";
+  int port = 65_535;
+  int connectionTimeout = 1_000; // millis
+  int readTimeout = 5_000; // millis
+//  String keyStore = PROJECT_ROOT + "Project/work/vroong-tcplibrary/src/main/resources/keystore-for-client.jks";
+//  String keyStorePassword = "secret";
+//  String trustStore = PROJECT_ROOT + "Project/work/vroong-tcplibrary/src/main/resources/truststore-for-client.jks";
+//  String trustStorePassword = "secret";
+  String keyStore;
+  String keyStorePassword;
+  String trustStore;
+  String trustStorePassword;
+  Pool pool = new Pool();
 
   @Getter
   @Setter

@@ -1,6 +1,7 @@
 package com.vroong.tcp.client;
 
 import com.vroong.tcp.TcpUtils;
+import com.vroong.tcp.config.TcpClientProperties;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.InputStream;
@@ -11,21 +12,17 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class DisposableTcpClient extends AbstractTcpClient {
 
-  private final String host;
-  private final int port;
-
   private Socket socket;
   private OutputStream writer;
   private InputStream reader;
 
-  public DisposableTcpClient(String host, int port) {
-    this.host = host;
-    this.port = port;
+  public DisposableTcpClient(TcpClientProperties properties, boolean useTLS) {
+    super(properties, useTLS);
   }
 
   @Override
   public void write(byte[] message) throws Exception {
-    socket = createSocket(host, port, connectionTimeout, readTimeout);
+    socket = createSocket();
     writer = new BufferedOutputStream(socket.getOutputStream());
     writer.write(message);
     writer.flush();

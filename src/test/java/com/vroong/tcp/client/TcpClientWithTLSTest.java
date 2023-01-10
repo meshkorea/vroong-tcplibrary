@@ -21,8 +21,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.util.ReflectionUtils;
 
 @Slf4j
-@Disabled("For this test to be working correctly, the EcoServer must be working...")
-class TcpClientTest {
+@Disabled("For this test to be working correctly, the EcoServerWithTLS must be working...")
+class TcpClientWithTLSTest {
 
   final static Charset charset = DEFAULT_CHARSET;
 
@@ -31,7 +31,7 @@ class TcpClientTest {
 
   @Test
   void disposableTcpClient() throws Exception {
-    final TcpClient client = new DisposableTcpClient(properties, false);
+    final TcpClient client = new DisposableTcpClient(properties, true);
 
     final String message = "안녕하세요?\n";
     client.write(message.getBytes(charset));
@@ -42,7 +42,7 @@ class TcpClientTest {
 
   @Test
   void pooledTcpClient() throws Exception {
-    final TcpClient client = new PooledTcpClient(properties, false);
+    final TcpClient client = new PooledTcpClient(properties, true);
 
     final ObjectPool<Tuple> pool = getPool(client);
     assertEquals(poolConfig.getMinIdle(), pool.getNumIdle());
@@ -64,7 +64,7 @@ class TcpClientTest {
     // 동시성 문제가 있지만, 완전 못쓸 수준을 아니라 판단함
     // spring-data-redis 등도 apache.commons.pool2를 사용함
   void pooledTcpClient_underMultiThreads() {
-    final TcpClient client = new PooledTcpClient(properties, false);
+    final TcpClient client = new PooledTcpClient(properties, true);
     final ObjectPool<Tuple> pool = getPool(client);
     final int noOfTests = poolConfig.getMaxTotal();
     final Executor executor = Executors.newFixedThreadPool(noOfTests);
