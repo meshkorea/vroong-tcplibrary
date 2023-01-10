@@ -12,7 +12,6 @@ package tcp {
         abstract AbstractTcpClient implements TcpClient {
             # int connectionTimeout
             # int readTimeout
-            # Charset charset
 
             + {abstract} void write(byte[] message)
             + {abstract} byte[] read()
@@ -50,15 +49,15 @@ package tcp {
         }
 
         Parseable -[hidden]left-> Parser
-    }
 
-    package tcpExample {
-        class FixedByteFormatter implements Formatter {
-            + void format(Packet formattable)
-        }
-        class FiexedByteParser implements Parser {
-            + void parse(Packet parseable)
-        }
+        package example {
+                class FixedByteFormatter implements Formatter {
+                    + void format(Packet formattable)
+                }
+                class FiexedByteParser implements Parser {
+                    + void parse(Packet parseable)
+                }
+            }
     }
 
     Packet -[hidden]down-> TcpMessage

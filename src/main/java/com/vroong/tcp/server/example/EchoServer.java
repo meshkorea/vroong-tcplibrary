@@ -1,7 +1,8 @@
-package com.vroong.tcp.server;
+package com.vroong.tcp.server.example;
 
 import com.vroong.tcp.TcpUtils;
 import com.vroong.tcp.config.TcpServerProperties;
+import com.vroong.tcp.server.AbstractTcpServer;
 import java.io.InputStream;
 import java.io.OutputStream;
 import lombok.SneakyThrows;

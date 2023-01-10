@@ -1,4 +1,4 @@
-package com.vroong.tcp.tcpExample;
+package com.vroong.tcp.visitor.example;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

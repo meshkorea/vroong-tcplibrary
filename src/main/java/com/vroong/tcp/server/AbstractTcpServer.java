@@ -66,11 +66,11 @@ public abstract class AbstractTcpServer {
   @SneakyThrows
   public void stop() {
     if (socketHolder != null) {
-      socketHolder.get().forEach(s -> {
+      socketHolder.get().forEach(socket -> {
         try {
-          s.close();
+          socket.close();
         } catch (IOException e) {
-          log.error(String.format("Connection to port %s was not closed", s.getPort()));
+          log.error(String.format("Connection to port %s was not closed", socket.getPort()));
         }
       });
     }
