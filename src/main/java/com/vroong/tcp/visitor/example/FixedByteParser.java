@@ -1,4 +1,4 @@
-package com.vroong.tcp.tcpExample;
+package com.vroong.tcp.visitor.example;
 
 import com.vroong.tcp.Item;
 import com.vroong.tcp.Packet;

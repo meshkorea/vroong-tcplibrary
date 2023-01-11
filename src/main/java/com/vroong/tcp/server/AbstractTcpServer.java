@@ -1,10 +1,11 @@
 package com.vroong.tcp.server;
 
 import com.vroong.tcp.config.TcpServerProperties;
-import java.io.BufferedReader;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -14,7 +15,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
-import javax.annotation.PreDestroy;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,15 +25,14 @@ public abstract class AbstractTcpServer {
   protected final ExecutorService executor;
 
   protected final AtomicReference<ServerSocket> serverSocketHolder = new AtomicReference<>();
-  protected final AtomicReference<List<Socket>> socketHolder = new AtomicReference<>(
-      new ArrayList<>());
+  protected final AtomicReference<List<Socket>> socketHolder = new AtomicReference<>(new ArrayList<>());
 
   public AbstractTcpServer(TcpServerProperties properties) {
     this.port = properties.getPort();
     this.executor = Executors.newFixedThreadPool(properties.getMaxConnection());
   }
 
-  public abstract void handleMessage(BufferedReader reader, PrintWriter writer);
+  public abstract void handleMessage(InputStream reader, OutputStream writer);
 
   @SneakyThrows
   public void start() {
@@ -47,19 +46,14 @@ public abstract class AbstractTcpServer {
       log.info("A connection established to port {}", socket.getPort());
 
       CompletableFuture.runAsync(() -> {
-        PrintWriter writer = null;
-        BufferedReader reader = null;
-        try {
-          writer = new PrintWriter(socket.getOutputStream(), true);
-          reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        try (BufferedInputStream reader = new BufferedInputStream(socket.getInputStream());
+            BufferedOutputStream writer = new BufferedOutputStream(socket.getOutputStream())) {
 
           handleMessage(reader, writer);
         } catch (IOException e) {
           log.warn("{}: {}", e.getMessage(), socket.getPort());
         } finally {
           try {
-            reader.close();
-            writer.close();
             socket.close();
           } catch (IOException e) {
             log.error(String.format("Connection to port %s was not closed", socket.getPort()));
@@ -69,15 +63,14 @@ public abstract class AbstractTcpServer {
     }
   }
 
-  @PreDestroy
   @SneakyThrows
   public void stop() {
     if (socketHolder != null) {
-      socketHolder.get().forEach(s -> {
+      socketHolder.get().forEach(socket -> {
         try {
-          s.close();
+          socket.close();
         } catch (IOException e) {
-          log.error(String.format("Connection to port %s was not closed", s.getPort()));
+          log.error(String.format("Connection to port %s was not closed", socket.getPort()));
         }
       });
     }

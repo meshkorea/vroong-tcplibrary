@@ -62,3 +62,7 @@ dependencies {
 	testImplementation loggers
 	testImplementation 'org.junit.jupiter:junit-jupiter:5.8.2'
 }
+
+test {
+	useJUnitPlatform()
+}

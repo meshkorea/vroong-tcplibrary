@@ -1,11 +1,11 @@
 package com.vroong.tcp.client;
 
+import com.vroong.tcp.TcpUtils;
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.nio.charset.Charset;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -27,7 +27,8 @@ public class PooledTcpClient extends AbstractTcpClient {
 
   private Tuple currentTuple;
 
-  public PooledTcpClient(String host, int port, Charset charset, int minIdle, int maxIdle, int maxTotal) {
+  public PooledTcpClient(String host, int port, int minIdle, int maxIdle, int maxTotal) {
+
     final GenericObjectPoolConfig<Tuple> config = new GenericObjectPoolConfig<>();
     // org.apache.commons.pool2.impl.GenericObjectPoolConfig.DEFAULT_MIN_IDLE = 0
     config.setMinIdle(minIdle);
@@ -43,8 +44,7 @@ public class PooledTcpClient extends AbstractTcpClient {
       public Tuple create() throws Exception {
         final Socket socket = createSocket(host, port, connectionTimeout, readTimeout);
         final BufferedOutputStream writer = new BufferedOutputStream(socket.getOutputStream());
-        final BufferedReader reader = new BufferedReader(
-            new InputStreamReader(socket.getInputStream(), charset));
+        final BufferedInputStream reader = new BufferedInputStream(socket.getInputStream());
 
         return new Tuple(socket, writer, reader);
       }
@@ -74,8 +74,6 @@ public class PooledTcpClient extends AbstractTcpClient {
     } catch (Exception e) {
       log.error(String.format("Socket add failed: %s", e.getMessage()), e);
     }
-
-    this.charset = charset;
   }
 
   @Override
@@ -91,12 +89,12 @@ public class PooledTcpClient extends AbstractTcpClient {
   @Override
   public byte[] read() throws Exception {
     System.out.println("reader: " + currentTuple.toString());
-    final BufferedReader reader = currentTuple.getReader();
-    final byte[] message = reader.readLine().getBytes(charset);
+    final InputStream reader = currentTuple.getReader();
+    final byte[] rawMessage = TcpUtils.readLine(reader);
 
     clearResources();
 
-    return message;
+    return rawMessage;
   }
 
   private void clearResources() throws Exception {
@@ -121,6 +119,6 @@ public class PooledTcpClient extends AbstractTcpClient {
 
     private Socket socket;
     private OutputStream writer;
-    private BufferedReader reader;
+    private InputStream reader;
   }
 }

@@ -1,4 +1,4 @@
-package com.vroong.tcp.tcpExample;
+package com.vroong.tcp.visitor.example;
 
 import com.vroong.tcp.Item;
 import com.vroong.tcp.Packet;
@@ -26,7 +26,7 @@ public class FixedByteFormatter implements Formatter {
 
   private String doFormat(List<TcpMessage> components) {
     final StringBuilder formatted = new StringBuilder();
-    components.stream()
+    components
         .forEach(component -> {
           String fragment = "";
           if (component instanceof Item) {
