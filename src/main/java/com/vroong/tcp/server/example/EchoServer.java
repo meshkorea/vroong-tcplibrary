@@ -1,6 +1,5 @@
 package com.vroong.tcp.server.example;
 
-import com.vroong.tcp.TcpUtils;
 import com.vroong.tcp.config.TcpServerProperties;
 import com.vroong.tcp.server.AbstractTcpServer;
 import java.io.InputStream;
@@ -15,16 +14,13 @@ public class EchoServer extends AbstractTcpServer {
     super(properties);
   }
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws Exception {
     new EchoServer(new TcpServerProperties()).start();
   }
 
   @SneakyThrows
   @Override
-  public void handleMessage(InputStream reader, OutputStream writer) {
-    final byte[] buffer = TcpUtils.readLine(reader);
-
-    writer.write(buffer);
-    writer.flush();
+  public void receive(InputStream reader, OutputStream writer) {
+    strategy.write(writer, strategy.read(reader));
   }
 }

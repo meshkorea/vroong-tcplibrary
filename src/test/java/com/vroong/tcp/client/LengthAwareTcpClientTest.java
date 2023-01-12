@@ -7,7 +7,9 @@ import com.vroong.tcp.client.PooledTcpClient.Tuple;
 import com.vroong.tcp.config.TcpClientProperties;
 import com.vroong.tcp.config.TcpClientProperties.Pool;
 import com.vroong.tcp.config.TcpServerProperties;
-import com.vroong.tcp.server.example.EchoServer;
+import com.vroong.tcp.message.strategy.HeaderStrategy;
+import com.vroong.tcp.message.strategy.LengthAwareHeaderStrategy;
+import com.vroong.tcp.server.example.LengthAwareEchoServer;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -29,19 +31,21 @@ import org.junit.platform.commons.util.ReflectionUtils;
 
 @Slf4j
 @TestInstance(Lifecycle.PER_CLASS)
-class TcpClientTest {
+class LengthAwareTcpClientTest {
 
   final static Charset charset = DEFAULT_CHARSET;
 
-  final TcpClientProperties clientProperties = new TcpClientProperties();
+  final TcpClientProperties properties = new TcpClientProperties();
   final TcpServerProperties serverProperties = new TcpServerProperties();
-  final Pool poolConfig = clientProperties.getPool();
+  final Pool poolConfig = properties.getPool();
 
-  final EchoServer server = new EchoServer(serverProperties);
+  final LengthAwareEchoServer server = new LengthAwareEchoServer(serverProperties);
+
+  final HeaderStrategy strategy = new LengthAwareHeaderStrategy('0', 4, DEFAULT_CHARSET);
 
   @Test
   void disposableTcpClient() throws Exception {
-    final TcpClient client = new DisposableTcpClient(clientProperties);
+    final TcpClient client = new DisposableTcpClient(properties, strategy, false);
 
     final String message = "안녕하세요?";
     final byte[] response = client.send(message.getBytes(charset));
@@ -51,7 +55,7 @@ class TcpClientTest {
 
   @Test
   void pooledTcpClient() throws Exception {
-    final TcpClient client = new PooledTcpClient(clientProperties);
+    final TcpClient client = new PooledTcpClient(properties, strategy, false);
 
     final ObjectPool<Tuple> pool = getPool(client);
     assertEquals(poolConfig.getMinIdle(), pool.getNumIdle());
@@ -69,7 +73,7 @@ class TcpClientTest {
     // 동시성 문제가 있지만, 완전 못쓸 수준을 아니라 판단함
     // spring-data-redis 등도 apache.commons.pool2를 사용함
   void pooledTcpClient_underMultiThreads() {
-    final TcpClient client = new PooledTcpClient(clientProperties);
+    final TcpClient client = new PooledTcpClient(properties, strategy, false);
     final ObjectPool<Tuple> pool = getPool(client);
     final int noOfTests = poolConfig.getMaxTotal();
     final Executor executor = Executors.newFixedThreadPool(noOfTests);
@@ -120,6 +124,8 @@ class TcpClientTest {
   @SneakyThrows
   @BeforeAll
   void setUp() {
+//    serverProperties.setKeyStore(serverProperties.getKeyStore().replace("main", "test"));
+//    serverProperties.setTrustStore(serverProperties.getTrustStore().replace("main", "test"));
     new Thread(() -> {
       try {
         server.start();

@@ -1,6 +1,8 @@
 package com.vroong.tcp.client;
 
 import com.vroong.tcp.config.TcpClientProperties;
+import com.vroong.tcp.message.strategy.HeaderStrategy;
+import com.vroong.tcp.message.strategy.NullHeaderStrategy;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -13,25 +15,34 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public abstract class AbstractTcpClient implements TcpClient {
 
-  @Getter
-  private String host;
+  protected final HeaderStrategy strategy;
 
   @Getter
-  private int port;
+  private final String host;
+
+  @Getter
+  private final int port;
 
   @Setter
-  protected int connectionTimeout;
+  private int connectionTimeout;
 
   @Setter
-  protected int readTimeout;
+  private int readTimeout;
 
   private final SocketFactory socketFactory;
 
-  public AbstractTcpClient(TcpClientProperties properties, boolean useTLS) {
+  public AbstractTcpClient(TcpClientProperties properties) {
+    this(properties, new NullHeaderStrategy(), false);
+  }
+
+  public AbstractTcpClient(TcpClientProperties properties, HeaderStrategy strategy, boolean useTLS) {
+    this.strategy = strategy;
+
     this.host = properties.getHost();
     this.port = properties.getPort();
     this.connectionTimeout = properties.getConnectionTimeout();
     this.readTimeout = properties.getReadTimeout();
+
     if (useTLS) {
       System.setProperty("javax.net.ssl.trustStore", properties.getTrustStore());
       System.setProperty("javax.net.ssl.trustStorePassword", properties.getTrustStorePassword());
@@ -41,14 +52,12 @@ public abstract class AbstractTcpClient implements TcpClient {
       System.setProperty("javax.net.ssl.keyStorePassword", properties.getKeyStorePassword());
 //      System.setProperty("javax.net.debug", "all");
     }
+
     this.socketFactory = useTLS ? SSLSocketFactory.getDefault() : SocketFactory.getDefault();
   }
 
   @Override
-  public abstract void write(byte[] message) throws Exception;
-
-  @Override
-  public abstract byte[] read() throws Exception;
+  public abstract byte[] send(byte[] message) throws Exception;
 
   protected Socket createSocket()
       throws Exception {

@@ -3,105 +3,120 @@
 skinparam ClassAttributeIconSize 0
 
 package tcp {
-    package client {
-        interface TcpClient {
-            + void write(byte[] message)
-            + byte[] read()
-        }
-
-        abstract AbstractTcpClient implements TcpClient {
-            # int connectionTimeout
-            # int readTimeout
-
-            + {abstract} void write(byte[] message)
-            + {abstract} byte[] read()
-            # Socket createSocket(String host, int port, int connectionTimeout, int readTimeout)
-        }
-
-        class DisposableTcpClient extends AbstractTcpClient {
-            - Socket socket
-            + void write(byte[] message)
-            + byte[] read()
-        }
-
-        class PooledTcpClient extends AbstractTcpClient {
-            - ObjectPool<Tuple> pool
-            + void write(byte[] message)
-            + byte[] read()
-        }
+  package client {
+    interface TcpClient {
+      + void write(byte[] message)
+      + byte[] read()
     }
 
-    package message {
-        package visitor {
-            interface Formattable {
-                + void accept(Formatter formatter)
-            }
+    abstract AbstractTcpClient implements TcpClient {
+      # int connectionTimeout
+      # int readTimeout
 
-            interface Formatter {
-                + void format(Packet formattable)
-            }
-
-            interface Parseable {
-                + void accept(Parser parser)
-            }
-
-            interface Parser {
-                + void parse(Packet parseable)
-            }
-
-            Parseable -[hidden]left-> Parser
-
-            package example {
-                    class FixedByteFormatter implements Formatter {
-                        + void format(Packet formattable)
-                    }
-                    class FiexedByteParser implements Parser {
-                        + void parse(Packet parseable)
-                    }
-                }
-        }
-
-        Packet -[hidden]down-> TcpMessage
-
-        interface TcpMessage {
-            + String getName()
-            + void setName(String name)
-            + int getPointer()
-            + String getValue()
-            + void setValue(String value)
-        }
-
-        interface TcpMessageTemplateFactory {
-            + List<TcpMessage> create(byte[] tcpMessage)
-        }
-
-        class Packet implements Parseable, Formattable, TcpMessage {
-            - List<TcpMessage> messageComponents
-            + void accept(Parser parser)
-            + void accept(Formatter formatter)
-            + void add(TcpMessage component)
-        }
-
-        class Item implements TcpMessage {
-        }
-
-        Packet ..> Parser
-        Packet ..> Formatter
-        Packet "1"-down->"n" TcpMessage
+      + {abstract} void write(byte[] message)
+      + {abstract} byte[] read()
+      # Socket createSocket(String host, int port, int connectionTimeout, int readTimeout)
     }
+
+    class DisposableTcpClient extends AbstractTcpClient {
+      - Socket socket
+      + void write(byte[] message)
+      + byte[] read()
+    }
+
+    class PooledTcpClient extends AbstractTcpClient {
+      - ObjectPool<Tuple> pool
+      + void write(byte[] message)
+      + byte[] read()
+    }
+}
+
+package message {
+  package strategy {
+    interface HeaderStrategy {
+      + byte[] read(InputStream reader)
+      + void write(OutputStream writer, byte[] body)
+    }
+
+    class LengthAwareHeaderStrategy implements HeaderStrategy {
+      - String lpadChar
+      - int headerLength
+      - Charset charset
+    }
+
+    class NullHeaderStrategy implements HeaderStrategy
+  }
+
+  package visitor {
+    interface Formattable {
+      + void accept(Formatter formatter)
+    }
+
+    interface Formatter {
+      + void format(Packet formattable)
+    }
+
+    interface Parseable {
+      + void accept(Parser parser)
+    }
+
+    interface Parser {
+      + void parse(Packet parseable)
+    }
+
+    Parseable -[hidden]left-> Parser
+
+    package example {
+      class FixedByteFormatter implements Formatter {
+        + void format(Packet formattable)
+      }
+      class FiexedByteParser implements Parser {
+        + void parse(Packet parseable)
+      }
+    }
+  }
+
+  Packet -[hidden]down-> TcpMessage
+
+  interface TcpMessage {
+    + String getName()
+    + void setName(String name)
+    + int getPointer()
+    + String getValue()
+    + void setValue(String value)
+  }
+
+  interface TcpMessageTemplateFactory {
+    + List<TcpMessage> create(byte[] tcpMessage)
+  }
+
+  class Packet implements Parseable, Formattable, TcpMessage {
+    - List<TcpMessage> messageComponents
+    + void accept(Parser parser)
+    + void accept(Formatter formatter)
+    + void add(TcpMessage component)
+  }
+
+    class Item implements TcpMessage
+
+    Packet ....> Parser
+    Packet ....> Formatter
+    Packet "1"-->"n" TcpMessage
+  }
 }
 
 package org.apache.commons.pool2.impl {
-    class GenericObjectPool<Socket>
+  class GenericObjectPool<Socket>
 }
 
 package java.net {
-    class Socket
+  class Socket
 }
 
-DisposableTcpClient -down-> Socket
-PooledTcpClient --down--> GenericObjectPool
-GenericObjectPool -down-> Socket
+DisposableTcpClient --> Socket
+PooledTcpClient --> GenericObjectPool
+GenericObjectPool --> Socket
+AbstractTcpClient --> HeaderStrategy
 
 FixedByteFormatter -[hidden]down-> TcpMessageTemplateFactory
 

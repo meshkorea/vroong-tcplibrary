@@ -1,7 +1,7 @@
 package com.vroong.tcp.client;
 
-import com.vroong.tcp.TcpUtils;
 import com.vroong.tcp.config.TcpClientProperties;
+import com.vroong.tcp.message.strategy.HeaderStrategy;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.InputStream;
@@ -24,13 +24,21 @@ import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 public class PooledTcpClient extends AbstractTcpClient {
 
   @Getter(AccessLevel.PRIVATE)
-  private final ObjectPool<Tuple> pool;
+  private ObjectPool<Tuple> pool;
 
   private Tuple currentTuple;
 
-  public PooledTcpClient(TcpClientProperties properties, boolean useTLS) {
-    super(properties, useTLS);
+  public PooledTcpClient(TcpClientProperties properties) {
+    super(properties);
+    initPool(properties);
+  }
 
+  public PooledTcpClient(TcpClientProperties properties, HeaderStrategy strategy, boolean useTLS) {
+    super(properties, strategy, useTLS);
+    initPool(properties);
+  }
+
+  private void initPool(TcpClientProperties properties) {
     final PooledObjectFactory<Tuple> poolFactory = new BasePooledObjectFactory<Tuple>() {
       @Override
       public Tuple create() throws Exception {
@@ -79,24 +87,17 @@ public class PooledTcpClient extends AbstractTcpClient {
   }
 
   @Override
-  public void write(byte[] message) throws Exception {
+  public byte[] send(byte[] body) throws Exception {
     currentTuple = pool.borrowObject();
-    System.out.println("write: " + currentTuple.toString());
-
     final OutputStream writer = currentTuple.getWriter();
-    writer.write(message);
-    writer.flush();
-  }
-
-  @Override
-  public byte[] read() throws Exception {
-    System.out.println("reader: " + currentTuple.toString());
     final InputStream reader = currentTuple.getReader();
-    final byte[] rawMessage = TcpUtils.readLine(reader);
+
+    strategy.write(writer, body);
+    final byte[] response = strategy.read(reader);
 
     clearResources();
 
-    return rawMessage;
+    return response;
   }
 
   private void clearResources() throws Exception {

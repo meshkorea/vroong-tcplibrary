@@ -1,7 +1,7 @@
 package com.vroong.tcp.client;
 
-import com.vroong.tcp.TcpUtils;
 import com.vroong.tcp.config.TcpClientProperties;
+import com.vroong.tcp.message.strategy.HeaderStrategy;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.InputStream;
@@ -16,32 +16,30 @@ public class DisposableTcpClient extends AbstractTcpClient {
   private OutputStream writer;
   private InputStream reader;
 
-  public DisposableTcpClient(TcpClientProperties properties, boolean useTLS) {
-    super(properties, useTLS);
+  public DisposableTcpClient(TcpClientProperties properties) {
+    super(properties);
+  }
+
+  public DisposableTcpClient(TcpClientProperties properties, HeaderStrategy strategy, boolean useTLS) {
+    super(properties, strategy, useTLS);
   }
 
   @Override
-  public void write(byte[] message) throws Exception {
+  public byte[] send(byte[] body) throws Exception {
     socket = createSocket();
     writer = new BufferedOutputStream(socket.getOutputStream());
-    writer.write(message);
-    writer.flush();
-  }
-
-  @Override
-  public byte[] read() throws Exception {
     reader = new BufferedInputStream(socket.getInputStream());
-    final byte[] rawMessage = TcpUtils.readLine(reader);
+
+    strategy.write(writer, body);
+    final byte[] response = strategy.read(reader);
 
     clearResources();
 
-    return rawMessage;
+    return response;
   }
 
   private void clearResources() throws Exception {
     if (socket != null) {
-      socket.shutdownOutput();
-      socket.shutdownInput();
       socket.close();
     }
 
