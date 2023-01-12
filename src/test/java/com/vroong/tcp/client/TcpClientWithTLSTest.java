@@ -26,13 +26,13 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.platform.commons.util.ReflectionUtils;
 
 @Slf4j
 @TestInstance(Lifecycle.PER_CLASS)
 class TcpClientWithTLSTest {
-
-  final static Charset charset = DEFAULT_CHARSET;
 
   final TcpClientProperties properties = new TcpClientProperties();
   final TcpServerProperties serverProperties = new TcpServerProperties();
@@ -40,8 +40,11 @@ class TcpClientWithTLSTest {
 
   final EchoServerWithTLS server = new EchoServerWithTLS(serverProperties);
 
-  @Test
-  void disposableTcpClient() throws Exception {
+  @ParameterizedTest
+  @ValueSource(strings = {"utf-8", "euc-kr", "cp949"})
+  void disposableTcpClient(String charsetName) throws Exception {
+    final Charset charset = Charset.forName(charsetName);
+
     final TcpClient client = new DisposableTcpClient(properties, new NullHeaderStrategy(), true);
 
     final String message = "안녕하세요?";
@@ -50,8 +53,11 @@ class TcpClientWithTLSTest {
     assertEquals(message, new String(response, charset));
   }
 
-  @Test
-  void pooledTcpClient() throws Exception {
+  @ParameterizedTest
+  @ValueSource(strings = {"utf-8", "euc-kr", "cp949"})
+  void pooledTcpClient(String charsetName) throws Exception {
+    final Charset charset = Charset.forName(charsetName);
+
     final TcpClient client = new PooledTcpClient(properties, new NullHeaderStrategy(), true);
 
     final ObjectPool<Tuple> pool = getPool(client);
@@ -70,6 +76,8 @@ class TcpClientWithTLSTest {
     // 동시성 문제가 있지만, 완전 못쓸 수준을 아니라 판단함
     // spring-data-redis 등도 apache.commons.pool2를 사용함
   void pooledTcpClient_underMultiThreads() {
+    final Charset charset = DEFAULT_CHARSET;
+
     final TcpClient client = new PooledTcpClient(properties, new NullHeaderStrategy(), true);
     final ObjectPool<Tuple> pool = getPool(client);
     final int noOfTests = poolConfig.getMaxTotal();
