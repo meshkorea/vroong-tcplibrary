@@ -3,8 +3,8 @@ package com.vroong.tcp.visitor.example;
 import static com.vroong.tcp.config.GlobalConstants.DEFAULT_CHARSET;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.vroong.tcp.Item;
-import com.vroong.tcp.Packet;
+import com.vroong.tcp.message.Item;
+import com.vroong.tcp.message.Packet;
 import com.vroong.tcp.config.TcpClientProperties;
 import com.vroong.tcp.visitor.Formatter;
 import lombok.extern.slf4j.Slf4j;

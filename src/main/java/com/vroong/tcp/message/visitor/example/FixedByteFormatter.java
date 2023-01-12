@@ -2,9 +2,9 @@ package com.vroong.tcp.visitor.example;
 
 import static com.vroong.tcp.config.GlobalConstants.DEFAULT_CHARSET;
 
-import com.vroong.tcp.Item;
-import com.vroong.tcp.Packet;
-import com.vroong.tcp.TcpMessage;
+import com.vroong.tcp.message.Item;
+import com.vroong.tcp.message.Packet;
+import com.vroong.tcp.message.TcpMessage;
 import com.vroong.tcp.visitor.Formatter;
 import java.nio.charset.Charset;
 import java.util.List;

@@ -31,62 +31,64 @@ package tcp {
         }
     }
 
-    package visitor {
-        interface Formattable {
-            + void accept(Formatter formatter)
-        }
-
-        interface Formatter {
-            + void format(Packet formattable)
-        }
-
-        interface Parseable {
-            + void accept(Parser parser)
-        }
-
-        interface Parser {
-            + void parse(Packet parseable)
-        }
-
-        Parseable -[hidden]left-> Parser
-
-        package example {
-                class FixedByteFormatter implements Formatter {
-                    + void format(Packet formattable)
-                }
-                class FiexedByteParser implements Parser {
-                    + void parse(Packet parseable)
-                }
+    package message {
+        package visitor {
+            interface Formattable {
+                + void accept(Formatter formatter)
             }
+
+            interface Formatter {
+                + void format(Packet formattable)
+            }
+
+            interface Parseable {
+                + void accept(Parser parser)
+            }
+
+            interface Parser {
+                + void parse(Packet parseable)
+            }
+
+            Parseable -[hidden]left-> Parser
+
+            package example {
+                    class FixedByteFormatter implements Formatter {
+                        + void format(Packet formattable)
+                    }
+                    class FiexedByteParser implements Parser {
+                        + void parse(Packet parseable)
+                    }
+                }
+        }
+
+        Packet -[hidden]down-> TcpMessage
+
+        interface TcpMessage {
+            + String getName()
+            + void setName(String name)
+            + int getPointer()
+            + String getValue()
+            + void setValue(String value)
+        }
+
+        interface TcpMessageTemplateFactory {
+            + List<TcpMessage> create(byte[] tcpMessage)
+        }
+
+        class Packet implements Parseable, Formattable, TcpMessage {
+            - List<TcpMessage> messageComponents
+            + void accept(Parser parser)
+            + void accept(Formatter formatter)
+            + void add(TcpMessage component)
+        }
+
+        class Item implements TcpMessage {
+        }
+
+        Packet ..> Parser
+        Packet ..> Formatter
+        Packet "1"-down->"n" TcpMessage
     }
-
-    Packet -[hidden]down-> TcpMessage
-
-    interface TcpMessage {
-        + String getName()
-        + void setName(String name)
-        + int getPointer()
-        + String getValue()
-        + void setValue(String value)
-    }
-
-    interface TcpMessageTemplateFactory {
-        + List<TcpMessage> create(byte[] tcpMessage)
-    }
-
-    class Packet implements Parseable, Formattable, TcpMessage {
-        - List<TcpMessage> messageComponents
-        + void accept(Parser parser)
-        + void accept(Formatter formatter)
-        + void add(TcpMessage component)
-    }
-
-    class Item implements TcpMessage {
-    }
-
-    Packet ..> Parser
-    Packet ..> Formatter
-    Packet "1"-down->"n" TcpMessage
 }
 
 package org.apache.commons.pool2.impl {

@@ -3,17 +3,18 @@
 skinparam ClassAttributeIconSize 0
 
 package server {
-  abstract class AbstractTcpServer {
+  interface TcpServer {
+    + start(): void
+    + stop(): void
+    + receive(InputStream, OutputStream): void
+  }
+
+  abstract class AbstractTcpServer implements TcpServer {
     # int port
-    + {abstract} void handleMessage(InputStream reader, OutputStream writer)
-    + void start()
-    + void stop()
   }
 
   package example {
-    class EchoServer extends AbstractTcpServer {
-        + void handleMessage(InputStream reader, OutputStream writer)
-     }
+    class EchoServer extends AbstractTcpServer {}
   }
 }
 

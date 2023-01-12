@@ -1,4 +1,4 @@
-package com.vroong.tcp;
+package com.vroong.tcp.message;
 
 public interface TcpMessage {
 
