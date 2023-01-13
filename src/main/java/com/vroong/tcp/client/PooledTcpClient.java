@@ -26,8 +26,6 @@ public class PooledTcpClient extends AbstractTcpClient {
   @Getter(AccessLevel.PRIVATE)
   private ObjectPool<Tuple> pool;
 
-  private Tuple currentTuple;
-
   public PooledTcpClient(TcpClientProperties properties) {
     super(properties);
     initPool(properties);
@@ -88,19 +86,19 @@ public class PooledTcpClient extends AbstractTcpClient {
 
   @Override
   public byte[] send(byte[] body) throws Exception {
-    currentTuple = pool.borrowObject();
+    final Tuple currentTuple = pool.borrowObject();
     final OutputStream writer = currentTuple.getWriter();
     final InputStream reader = currentTuple.getReader();
 
     strategy.write(writer, body);
     final byte[] response = strategy.read(reader);
 
-    clearResources();
+    clearResources(currentTuple);
 
     return response;
   }
 
-  private void clearResources() throws Exception {
+  private void clearResources(Tuple currentTuple) throws Exception {
     final Socket socket = currentTuple.getSocket();
     if (log.isDebugEnabled()) {
       log.debug("Returning socket: socket={}, srcPort={}", socket.getRemoteSocketAddress(), socket.getLocalPort());

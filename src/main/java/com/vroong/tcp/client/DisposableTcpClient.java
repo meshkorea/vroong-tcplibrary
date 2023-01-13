@@ -12,10 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class DisposableTcpClient extends AbstractTcpClient {
 
-  private Socket socket;
-  private OutputStream writer;
-  private InputStream reader;
-
   public DisposableTcpClient(TcpClientProperties properties) {
     super(properties);
   }
@@ -26,19 +22,19 @@ public class DisposableTcpClient extends AbstractTcpClient {
 
   @Override
   public byte[] send(byte[] body) throws Exception {
-    socket = createSocket();
-    writer = new BufferedOutputStream(socket.getOutputStream());
-    reader = new BufferedInputStream(socket.getInputStream());
+    final Socket socket = createSocket();
+    final OutputStream writer = new BufferedOutputStream(socket.getOutputStream());
+    final InputStream reader = new BufferedInputStream(socket.getInputStream());
 
     strategy.write(writer, body);
     final byte[] response = strategy.read(reader);
 
-    clearResources();
+    clearResources(socket);
 
     return response;
   }
 
-  private void clearResources() throws Exception {
+  private void clearResources(Socket socket) throws Exception {
     if (socket != null) {
       socket.close();
     }
