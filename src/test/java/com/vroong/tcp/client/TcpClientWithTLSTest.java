@@ -129,8 +129,6 @@ class TcpClientWithTLSTest {
   @SneakyThrows
   @BeforeAll
   void setUp() {
-//    serverProperties.setKeyStore(serverProperties.getKeyStore().replace("main", "test"));
-//    serverProperties.setTrustStore(serverProperties.getTrustStore().replace("main", "test"));
     new Thread(() -> {
       try {
         server.start();

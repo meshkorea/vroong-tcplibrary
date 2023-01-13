@@ -48,12 +48,16 @@ public abstract class AbstractTcpServer implements TcpServer {
     if (useTLS) {
       System.setProperty("javax.net.ssl.keyStore", properties.getKeyStore());
       System.setProperty("javax.net.ssl.keyStorePassword", properties.getKeyStorePassword());
-//      System.setProperty("javax.net.debug", "all");
 
       System.setProperty("javax.net.ssl.trustStore", properties.getTrustStore());
       System.setProperty("javax.net.ssl.trustStorePassword", properties.getTrustStorePassword());
       System.setProperty("javax.net.ssl.trustStoreType", "JKS");
+
+      if (log.isDebugEnabled()) {
+        System.setProperty("javax.net.debug", "all");
+      }
     }
+
     this.serverSocketFactory = useTLS
         ? SSLServerSocketFactory.getDefault()
         : ServerSocketFactory.getDefault();

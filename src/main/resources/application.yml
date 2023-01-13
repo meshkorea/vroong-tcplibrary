@@ -2,18 +2,18 @@ tcp:
   server:
     port: 65535
     max-connection: 100
-    key-store: ${user.home}/Project/work/vroong-tcplibrary/src/main/resources/keystore-for-server.jks
+    key-store: ${user.dir}/src/main/resources/keystore-for-server.jks
     key-store-password: secret
-    trust-store: ${user.home}/Project/work/vroong-tcplibrary/src/main/resources/truststore-for-server.jks
+    trust-store: ${user.dir}/src/main/resources/truststore-for-server.jks
     trust-store-password: secret
   client:
     host: localhost
     port: ${tcp.server.port}
     connection-timeout: 1000 # millis
     read-timeout: 5000 # millis
-    key-store: ${user.home}/Project/work/vroong-tcplibrary/src/main/resources/keystore-for-client.jks
+    key-store: ${user.dir}/src/main/resources/keystore-for-client.jks
     key-store-password: secret
-    trust-store: ${user.home}/Project/work/vroong-tcplibrary/src/main/resources/truststore-for-client.jks
+    trust-store: ${user.dir}/src/main/resources/truststore-for-client.jks
     trust-store-password: secret
     pool:
       min-idle: 10
