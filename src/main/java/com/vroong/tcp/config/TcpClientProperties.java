@@ -1,8 +1,6 @@
 package com.vroong.tcp.config;
 
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 @Data
 public class TcpClientProperties {
@@ -18,12 +16,11 @@ public class TcpClientProperties {
   String trustStore = GlobalConstants.PROJECT_ROOT + "src/main/resources/truststore-for-client.jks";
   String trustStorePassword = "secret";
 
-  @Getter
-  @Setter
+  @Data
   public static class Pool {
 
-    final int minIdle = 10;
-    final int maxIdle = 10;
-    final int maxTotal = 100;
+    int minIdle = 10;
+    int maxIdle = 10;
+    int maxTotal = 100;
   }
 }

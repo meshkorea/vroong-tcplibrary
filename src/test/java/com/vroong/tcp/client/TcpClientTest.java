@@ -3,6 +3,7 @@ package com.vroong.tcp.client;
 import static com.vroong.tcp.config.GlobalConstants.DEFAULT_CHARSET;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import com.vroong.tcp.TestHelper;
 import com.vroong.tcp.client.PooledTcpClient.Tuple;
 import com.vroong.tcp.config.TcpClientProperties;
 import com.vroong.tcp.config.TcpClientProperties.Pool;
@@ -33,11 +34,13 @@ import org.junit.platform.commons.util.ReflectionUtils;
 @TestInstance(Lifecycle.PER_CLASS)
 class TcpClientTest {
 
-  final TcpClientProperties clientProperties = new TcpClientProperties();
-  final TcpServerProperties serverProperties = new TcpServerProperties();
-  final Pool poolConfig = clientProperties.getPool();
+  TestHelper libraryTest = new TestHelper();
 
-  final EchoServer server = new EchoServer(serverProperties);
+  TcpServerProperties serverProperties = libraryTest.getServerProperties();
+  TcpClientProperties clientProperties = libraryTest.getClientProperties();
+  Pool poolConfig = clientProperties.getPool();
+
+  EchoServer server = new EchoServer(serverProperties);
 
   @ParameterizedTest
   @ValueSource(strings = {"utf-8", "euc-kr", "cp949"})
