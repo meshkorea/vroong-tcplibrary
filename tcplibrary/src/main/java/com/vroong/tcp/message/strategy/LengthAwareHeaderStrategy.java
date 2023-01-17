@@ -6,11 +6,30 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Tcp header handling strategy, which has a header that contains length of the message
+ *
+ * e.g. when lpadChar='0', headerLength=4, the full message will be
+ *      0015hello world
+ *      which means the full message length is 15 bytes including the header itself.
+ *
+ */
 @Slf4j
 public class LengthAwareHeaderStrategy implements HeaderStrategy {
 
+  /**
+   * Left pad char prefixed before headerLength e.g. '0'
+   */
   private final char lpadChar;
+
+  /**
+   * Length of header e.g. 4
+   */
   private final int headerLength;
+
+  /**
+   * Charset to use when read header
+   */
   private final Charset charset;
 
   public LengthAwareHeaderStrategy(char lpadStr, int headerLength, Charset charset) {

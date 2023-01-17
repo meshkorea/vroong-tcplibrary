@@ -40,6 +40,14 @@ public abstract class AbstractTcpServer implements TcpServer {
     this(properties, new NullHeaderStrategy(), false, false);
   }
 
+  /**
+   * Construct a TcpServer.
+   *
+   * @param properties
+   * @param strategy
+   * @param useTLS true if communication requires TLS, otherwise false
+   * @param needClientAuth true if the client certificate is required, otherwise false
+   */
   public AbstractTcpServer(TcpServerProperties properties, HeaderStrategy strategy, boolean useTLS, boolean needClientAuth) {
     this.port = properties.getPort();
     this.executor = Executors.newFixedThreadPool(properties.getMaxConnection());
@@ -90,6 +98,7 @@ public abstract class AbstractTcpServer implements TcpServer {
         } catch (IOException e) {
           log.warn("{}: {}", e.getMessage(), socket.getPort());
         } finally {
+          // TODO: 클라이언트가 PooledTcpClient를 사용할 경우에 대한 처리 필요
           try {
             socket.close();
           } catch (IOException e) {
