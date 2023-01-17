@@ -1,1 +1,6 @@
-rootProject.name = 'tcplibrary'
+rootProject.name = 'vroong-tcplibrary'
+
+include 'tcplibrary'
+include 'vroongtcp-spring-boot-autoconfigure'
+include 'vroongtcp-spring-boot-starter'
+include 'vroongtcp-spring-boot-demo'
