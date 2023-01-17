@@ -1,0 +1,5 @@
+apply from: '../gradle/publishing.gradle'
+
+dependencies {
+    api project(':vroongtcp-spring-boot-autoconfigure')
+}
