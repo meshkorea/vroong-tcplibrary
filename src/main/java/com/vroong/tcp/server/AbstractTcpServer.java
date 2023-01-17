@@ -1,6 +1,8 @@
 package com.vroong.tcp.server;
 
 import com.vroong.tcp.config.TcpServerProperties;
+import com.vroong.tcp.message.strategy.HeaderStrategy;
+import com.vroong.tcp.message.strategy.NullHeaderStrategy;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
@@ -15,28 +17,62 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
-import lombok.SneakyThrows;
+import javax.net.ServerSocketFactory;
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLServerSocketFactory;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public abstract class AbstractTcpServer {
+public abstract class AbstractTcpServer implements TcpServer {
 
   protected final int port;
   protected final ExecutorService executor;
+  protected final HeaderStrategy strategy;
 
   protected final AtomicReference<ServerSocket> serverSocketHolder = new AtomicReference<>();
   protected final AtomicReference<List<Socket>> socketHolder = new AtomicReference<>(new ArrayList<>());
 
+  private final ServerSocketFactory serverSocketFactory;
+
+  private final boolean needClientAuth;
+
   public AbstractTcpServer(TcpServerProperties properties) {
-    this.port = properties.getPort();
-    this.executor = Executors.newFixedThreadPool(properties.getMaxConnection());
+    this(properties, new NullHeaderStrategy(), false, false);
   }
 
-  public abstract void handleMessage(InputStream reader, OutputStream writer);
+  public AbstractTcpServer(TcpServerProperties properties, HeaderStrategy strategy, boolean useTLS, boolean needClientAuth) {
+    this.port = properties.getPort();
+    this.executor = Executors.newFixedThreadPool(properties.getMaxConnection());
+    this.strategy = strategy;
 
-  @SneakyThrows
-  public void start() {
-    final ServerSocket serverSocket = new ServerSocket(port);
+    if (useTLS) {
+      System.setProperty("javax.net.ssl.keyStore", properties.getKeyStore());
+      System.setProperty("javax.net.ssl.keyStorePassword", properties.getKeyStorePassword());
+
+      System.setProperty("javax.net.ssl.trustStore", properties.getTrustStore());
+      System.setProperty("javax.net.ssl.trustStorePassword", properties.getTrustStorePassword());
+      System.setProperty("javax.net.ssl.trustStoreType", "JKS");
+
+      if (log.isDebugEnabled()) {
+        System.setProperty("javax.net.debug", "all");
+      }
+    }
+
+    this.serverSocketFactory = useTLS
+        ? SSLServerSocketFactory.getDefault()
+        : ServerSocketFactory.getDefault();
+
+    this.needClientAuth = needClientAuth;
+  }
+
+  public abstract void receive(InputStream reader, OutputStream writer);
+
+  public void start() throws Exception {
+    final ServerSocket serverSocket = serverSocketFactory.createServerSocket(port);
+    if (serverSocket instanceof SSLServerSocket) {
+      ((SSLServerSocket)serverSocket).setNeedClientAuth(needClientAuth);
+    }
+
     this.serverSocketHolder.set(serverSocket);
     log.info("Tcp server is listening at port {}", port);
 
@@ -46,10 +82,11 @@ public abstract class AbstractTcpServer {
       log.info("A connection established to port {}", socket.getPort());
 
       CompletableFuture.runAsync(() -> {
-        try (BufferedInputStream reader = new BufferedInputStream(socket.getInputStream());
-            BufferedOutputStream writer = new BufferedOutputStream(socket.getOutputStream())) {
+        try {
+          final BufferedInputStream reader = new BufferedInputStream(socket.getInputStream());
+          final BufferedOutputStream writer = new BufferedOutputStream(socket.getOutputStream());
 
-          handleMessage(reader, writer);
+          receive(reader, writer);
         } catch (IOException e) {
           log.warn("{}: {}", e.getMessage(), socket.getPort());
         } finally {
@@ -63,8 +100,7 @@ public abstract class AbstractTcpServer {
     }
   }
 
-  @SneakyThrows
-  public void stop() {
+  public void stop() throws Exception {
     if (socketHolder != null) {
       socketHolder.get().forEach(socket -> {
         try {

@@ -1,6 +1,7 @@
 package com.vroong.tcp.client;
 
-import com.vroong.tcp.TcpUtils;
+import com.vroong.tcp.config.TcpClientProperties;
+import com.vroong.tcp.message.strategy.HeaderStrategy;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.InputStream;
@@ -23,26 +24,23 @@ import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 public class PooledTcpClient extends AbstractTcpClient {
 
   @Getter(AccessLevel.PRIVATE)
-  private final ObjectPool<Tuple> pool;
+  private ObjectPool<Tuple> pool;
 
-  private Tuple currentTuple;
+  public PooledTcpClient(TcpClientProperties properties) {
+    super(properties);
+    initPool(properties);
+  }
 
-  public PooledTcpClient(String host, int port, int minIdle, int maxIdle, int maxTotal) {
+  public PooledTcpClient(TcpClientProperties properties, HeaderStrategy strategy, boolean useTLS) {
+    super(properties, strategy, useTLS);
+    initPool(properties);
+  }
 
-    final GenericObjectPoolConfig<Tuple> config = new GenericObjectPoolConfig<>();
-    // org.apache.commons.pool2.impl.GenericObjectPoolConfig.DEFAULT_MIN_IDLE = 0
-    config.setMinIdle(minIdle);
-    // org.apache.commons.pool2.impl.GenericObjectPoolConfig.DEFAULT_MAX_IDLE = 8
-    config.setMaxIdle(maxIdle);
-    // org.apache.commons.pool2.impl.GenericObjectPoolConfig.DEFAULT_MAX_TOTAL = 8
-    config.setMaxTotal(maxTotal);
-    config.setTestOnBorrow(true);
-    config.setTestWhileIdle(true);
-
-    final PooledObjectFactory<Tuple> factory = new BasePooledObjectFactory<Tuple>() {
+  private void initPool(TcpClientProperties properties) {
+    final PooledObjectFactory<Tuple> poolFactory = new BasePooledObjectFactory<Tuple>() {
       @Override
       public Tuple create() throws Exception {
-        final Socket socket = createSocket(host, port, connectionTimeout, readTimeout);
+        final Socket socket = createSocket();
         final BufferedOutputStream writer = new BufferedOutputStream(socket.getOutputStream());
         final BufferedInputStream reader = new BufferedInputStream(socket.getInputStream());
 
@@ -68,36 +66,39 @@ public class PooledTcpClient extends AbstractTcpClient {
       }
     };
 
-    this.pool = new GenericObjectPool<>(factory, config);
+    final GenericObjectPoolConfig<Tuple> poolConfig = new GenericObjectPoolConfig<>();
+    // org.apache.commons.pool2.impl.GenericObjectPoolConfig.DEFAULT_MIN_IDLE = 0
+    poolConfig.setMinIdle(properties.getPool().getMinIdle());
+    // org.apache.commons.pool2.impl.GenericObjectPoolConfig.DEFAULT_MAX_IDLE = 8
+    poolConfig.setMaxIdle(properties.getPool().getMaxIdle());
+    // org.apache.commons.pool2.impl.GenericObjectPoolConfig.DEFAULT_MAX_TOTAL = 8
+    poolConfig.setMaxTotal(properties.getPool().getMaxTotal());
+    poolConfig.setTestOnBorrow(true);
+    poolConfig.setTestWhileIdle(true);
+
+    this.pool = new GenericObjectPool<>(poolFactory, poolConfig);
     try {
-      this.pool.addObjects(minIdle);
+      this.pool.addObjects(properties.getPool().getMinIdle());
     } catch (Exception e) {
       log.error(String.format("Socket add failed: %s", e.getMessage()), e);
     }
   }
 
   @Override
-  public void write(byte[] message) throws Exception {
-    currentTuple = pool.borrowObject();
-    System.out.println("write: " + currentTuple.toString());
-
+  public byte[] send(byte[] body) throws Exception {
+    final Tuple currentTuple = pool.borrowObject();
     final OutputStream writer = currentTuple.getWriter();
-    writer.write(message);
-    writer.flush();
-  }
-
-  @Override
-  public byte[] read() throws Exception {
-    System.out.println("reader: " + currentTuple.toString());
     final InputStream reader = currentTuple.getReader();
-    final byte[] rawMessage = TcpUtils.readLine(reader);
 
-    clearResources();
+    strategy.write(writer, body);
+    final byte[] response = strategy.read(reader);
 
-    return rawMessage;
+    clearResources(currentTuple);
+
+    return response;
   }
 
-  private void clearResources() throws Exception {
+  private void clearResources(Tuple currentTuple) throws Exception {
     final Socket socket = currentTuple.getSocket();
     if (log.isDebugEnabled()) {
       log.debug("Returning socket: socket={}, srcPort={}", socket.getRemoteSocketAddress(), socket.getLocalPort());

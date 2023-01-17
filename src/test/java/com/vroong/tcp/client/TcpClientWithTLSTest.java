@@ -8,7 +8,8 @@ import com.vroong.tcp.client.PooledTcpClient.Tuple;
 import com.vroong.tcp.config.TcpClientProperties;
 import com.vroong.tcp.config.TcpClientProperties.Pool;
 import com.vroong.tcp.config.TcpServerProperties;
-import com.vroong.tcp.server.example.EchoServer;
+import com.vroong.tcp.message.strategy.NullHeaderStrategy;
+import com.vroong.tcp.server.example.EchoServerWithTLS;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -32,7 +33,7 @@ import org.junit.platform.commons.util.ReflectionUtils;
 
 @Slf4j
 @TestInstance(Lifecycle.PER_CLASS)
-class TcpClientTest {
+class TcpClientWithTLSTest {
 
   TestHelper libraryTest = new TestHelper();
 
@@ -40,14 +41,14 @@ class TcpClientTest {
   TcpClientProperties clientProperties = libraryTest.getClientProperties();
   Pool poolConfig = clientProperties.getPool();
 
-  EchoServer server = new EchoServer(serverProperties);
+  EchoServerWithTLS server = new EchoServerWithTLS(serverProperties);
 
   @ParameterizedTest
   @ValueSource(strings = {"utf-8", "euc-kr", "cp949"})
   void disposableTcpClient(String charsetName) throws Exception {
     final Charset charset = Charset.forName(charsetName);
 
-    final TcpClient client = new DisposableTcpClient(clientProperties);
+    final TcpClient client = new DisposableTcpClient(clientProperties, new NullHeaderStrategy(), true);
 
     final String message = "안녕하세요?";
     final byte[] response = client.send(message.getBytes(charset));
@@ -60,7 +61,7 @@ class TcpClientTest {
   void pooledTcpClient(String charsetName) throws Exception {
     final Charset charset = Charset.forName(charsetName);
 
-    final TcpClient client = new PooledTcpClient(clientProperties);
+    final TcpClient client = new PooledTcpClient(clientProperties, new NullHeaderStrategy(), true);
 
     final ObjectPool<Tuple> pool = getPool(client);
     assertEquals(poolConfig.getMinIdle(), pool.getNumIdle());
@@ -80,7 +81,7 @@ class TcpClientTest {
   void pooledTcpClient_underMultiThreads() {
     final Charset charset = DEFAULT_CHARSET;
 
-    final TcpClient client = new PooledTcpClient(clientProperties);
+    final TcpClient client = new PooledTcpClient(clientProperties, new NullHeaderStrategy(), true);
     final ObjectPool<Tuple> pool = getPool(client);
     final int noOfTests = poolConfig.getMaxTotal();
     final Executor executor = Executors.newFixedThreadPool(noOfTests);

@@ -2,18 +2,38 @@
 
 skinparam ClassAttributeIconSize 0
 
-package server {
-  abstract class AbstractTcpServer {
-    # int port
-    + {abstract} void handleMessage(InputStream reader, OutputStream writer)
-    + void start()
-    + void stop()
+package tcp {
+  package message {
+    package strategy {
+      interface HeaderStrategy {
+        + byte[] read(InputStream reader)
+        + void write(OutputStream writer, byte[] body)
+      }
+
+      class LengthAwareHeaderStrategy implements HeaderStrategy {
+        - String lpadChar
+        - int headerLength
+        - Charset charset
+      }
+
+      class NullHeaderStrategy implements HeaderStrategy
+    }
   }
 
-  package example {
-    class EchoServer extends AbstractTcpServer {
-        + void handleMessage(InputStream reader, OutputStream writer)
-     }
+  package server {
+    interface TcpServer {
+      + void start()
+      + void stop()
+      + void receive(InputStream, OutputStream)
+    }
+
+    abstract class AbstractTcpServer implements TcpServer {
+      # int port
+    }
+
+    package example {
+      class EchoServer extends AbstractTcpServer {}
+    }
   }
 }
 
@@ -22,7 +42,8 @@ package java.net {
   class Socket
 }
 
-AbstractTcpServer ..> ServerSocket
-AbstractTcpServer ..> Socket
+AbstractTcpServer .left.> ServerSocket
+AbstractTcpServer .left.> Socket
+AbstractTcpServer --> HeaderStrategy
 
 @enduml

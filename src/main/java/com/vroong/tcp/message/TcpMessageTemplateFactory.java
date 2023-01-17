@@ -1,4 +1,4 @@
-package com.vroong.tcp;
+package com.vroong.tcp.message;
 
 import java.util.List;
 

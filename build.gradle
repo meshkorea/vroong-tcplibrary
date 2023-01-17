@@ -57,6 +57,7 @@ def loggers = [
 ]
 
 dependencies {
+	implementation 'org.yaml:snakeyaml:1.33'
 	implementation 'org.apache.commons:commons-pool2:2.11.1'
 	implementation loggers
 	testImplementation loggers
