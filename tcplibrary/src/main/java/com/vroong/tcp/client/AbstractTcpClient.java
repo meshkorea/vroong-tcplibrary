@@ -35,6 +35,13 @@ public abstract class AbstractTcpClient implements TcpClient {
     this(properties, new NullHeaderStrategy(), false);
   }
 
+  /**
+   * Construct a TcpClient.
+   *
+   * @param properties
+   * @param strategy
+   * @param useTLS true if communication requires TLS, otherwise false
+   */
   public AbstractTcpClient(TcpClientProperties properties, HeaderStrategy strategy, boolean useTLS) {
     this.strategy = strategy;
 
@@ -53,6 +60,8 @@ public abstract class AbstractTcpClient implements TcpClient {
 
       if (log.isDebugEnabled()) {
         System.setProperty("javax.net.debug", "all");
+        log.debug("javax.net.ssl.keyStore={}, javax.net.ssl.keyStorePassword={}, javax.net.ssl.trustStore={}, javax.net.ssl.trustStorePassword={}, javax.net.ssl.trustStoreType={}",
+            properties.getKeyStore(), properties.getKeyStorePassword(), properties.getTrustStore(), properties.getTrustStorePassword(), "JKS");
       }
     }
 
@@ -62,8 +71,7 @@ public abstract class AbstractTcpClient implements TcpClient {
   @Override
   public abstract byte[] send(byte[] message) throws Exception;
 
-  protected Socket createSocket()
-      throws Exception {
+  protected Socket createSocket() throws Exception {
     final Socket socket = socketFactory.createSocket();
     // Java 소켓 옵션 설정하기 @see https://cbts.tistory.com/125
     socket.setSoTimeout(readTimeout); // read() 메서드가 블록킹할 시간
@@ -76,8 +84,8 @@ public abstract class AbstractTcpClient implements TcpClient {
       socket.connect(new InetSocketAddress(host, port), connectionTimeout);
       if (socket.isConnected()) {
         if (log.isDebugEnabled()) {
-          log.debug("Connected to {}, srcPort={}", socket.getRemoteSocketAddress(),
-              socket.getLocalPort());
+          log.debug("Connected to {}, srcPort={}, connectionTimeout={}, readTimeout={}", socket.getRemoteSocketAddress(),
+              socket.getLocalPort(), connectionTimeout, socket.getSoTimeout());
         }
       } else {
         throw new SocketConnectionFailedException(

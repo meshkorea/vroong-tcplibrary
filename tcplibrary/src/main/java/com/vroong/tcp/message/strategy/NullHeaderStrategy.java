@@ -11,6 +11,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 
+/**
+ * Tcp header handling strategy, which has a new line character as the delimiter of the message
+ *
+ * e.g. hello world\n
+ */
 public class NullHeaderStrategy implements HeaderStrategy {
 
   @Override

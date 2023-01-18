@@ -8,6 +8,12 @@ import java.io.Reader;
 
 public class TcpUtils {
 
+  /**
+   * Find the new line character in the given byte array.
+   *
+   * @param haystack
+   * @return
+   */
   public static boolean containsNewLine(byte[] haystack) {
     byte[] needle = new byte[]{ 10 };
     for (int i = 0; i <= haystack.length - needle.length; i++) {
@@ -22,6 +28,12 @@ public class TcpUtils {
     return false;
   }
 
+  /**
+   * Reads the give InputStream and translates into a String.
+   *
+   * @param in
+   * @return
+   */
   public static String inputStreamToString(InputStream in) {
     StringBuilder builder = new StringBuilder();
     try (Reader reader = new BufferedReader(new InputStreamReader(in))) {

@@ -15,6 +15,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+/**
+ * An object that houses a collection of an Item.
+ */
 @Getter
 @Setter
 @EqualsAndHashCode
