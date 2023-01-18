@@ -67,13 +67,10 @@ public class YourTcpServer extends AbstractTcpServer {
   }
   
   @Override
-  public void receive(InputStream reader, OutputStream writer) throws Exception {
-    byte[] message = strategy.read(reader);
-    
-    String response = "";
+  public byte[] receive(byte[] received) {
+    byte[] response = null;
     // your implementation here to set the value of response variable...
-    
-    strategy.write(writer, response.getBytes());
+    return response;
   }
 }
 ``` 

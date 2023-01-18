@@ -110,8 +110,10 @@ public class YourTcpServer extends AbstractTcpServer {
   }
   
   @Override
-  public void receive(InputStream reader, OutputStream writer) {
+  public byte[] receive(byte[] received) {
+    byte[] response = null;
     // Your implementation here...
+    return response;
   }
 }
 ```
@@ -124,10 +126,12 @@ public class YourSecureTcpServer extends AbstractTcpServer {
   public YourSecureTcpServer(TcpServerProperties properties) {
     super(properties, new NullHeaderStrategy(), true, true);
   }
-  
+
   @Override
-  public void receive(InputStream reader, OutputStream writer) {
+  public byte[] receive(byte[] received) {
+    byte[] response = null;
     // Your implementation here...
+    return response;
   }
 }
 ```
