@@ -95,6 +95,10 @@ public abstract class AbstractTcpServer implements TcpServer {
           final byte[] received = strategy.read(reader);
           final byte[] response = receive(received);
           strategy.write(writer, response);
+
+          if (log.isDebugEnabled()) {
+            log.debug("receive={}, send={}", received, response);
+          }
         } catch (IOException e) {
           log.warn("{}: {}", e.getMessage(), socket.getPort());
         } finally {

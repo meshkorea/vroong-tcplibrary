@@ -29,6 +29,10 @@ public class DisposableTcpClient extends AbstractTcpClient {
     strategy.write(writer, body);
     final byte[] response = strategy.read(reader);
 
+    if (log.isDebugEnabled()) {
+      log.debug("send={}, receive={}", body, response);
+    }
+
     clearResources(socket);
 
     return response;
