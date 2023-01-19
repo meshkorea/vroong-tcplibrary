@@ -17,6 +17,10 @@ import lombok.ToString;
 
 /**
  * An object that houses a collection of an Item.
+ *
+ * e.g. If the full message is:
+ *      "김메쉬  0030서버팀              클라이언트팀      "
+ * ["김메쉬", "0030", ["서버팀", "클라이언트팀"]] is a root Packet and ["서버팀", "클라이언트팀"] is a sub Packet.
  */
 @Getter
 @Setter

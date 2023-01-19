@@ -39,7 +39,7 @@ public abstract class AbstractTcpServer implements TcpServer {
   }
 
   /**
-   * Construct a TcpServer.
+   * Constructs a TcpServer.
    *
    * @param properties
    * @param strategy

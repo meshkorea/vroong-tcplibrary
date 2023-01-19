@@ -36,7 +36,7 @@ public abstract class AbstractTcpClient implements TcpClient {
   }
 
   /**
-   * Construct a TcpClient.
+   * Constructs a TcpClient.
    *
    * @param properties
    * @param strategy

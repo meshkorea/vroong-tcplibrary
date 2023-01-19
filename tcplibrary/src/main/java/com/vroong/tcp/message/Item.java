@@ -7,6 +7,10 @@ import lombok.ToString;
 
 /**
  * An object that represents a fragment of a tcp message.
+ *
+ * e.g. If the full message is:
+ *      "김메쉬  0030서버팀              클라이언트팀      "
+ * "김메쉬" is an Item, "0030" is an Item, and so on.
  */
 @Getter
 @EqualsAndHashCode
