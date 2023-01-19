@@ -58,13 +58,15 @@ public class YourService {
 @Component
 public class YourTcpServer extends AbstractTcpServer {
   
-  public YourTcpServer(TcpServerProperties properties, HeaderStrategy headerStrategy, Boolean useTLS, Boolean needClientAuth) {
-    super(properties, headerStrategy, useTLS, needClientAuth);
+  public YourTcpServer(TcpServerProperties properties, HeaderStrategy headerStrategy) {
+    super(properties, headerStrategy, true, true);
+//    super(properties, headerStrategy, true, false);
+//    super(properties, headerStrategy, false, false);
   }
-
-  public YourTcpServer(TcpServerProperties properties) {
-    super(properties);
-  }
+  
+//  public YourTcpServer(TcpServerProperties properties) {
+//    super(properties);
+//  }
   
   @Override
   public byte[] receive(byte[] received) {
@@ -74,6 +76,7 @@ public class YourTcpServer extends AbstractTcpServer {
   }
 }
 ``` 
+- Spring Container에 등록할 수 있다면 어느 방법이든 가능합니다.
 
 `SpringBootApplication` 구동시 `TcpServer`도 함께 구동해야 하며, 아래와 같은 방법으로 구동할 수 있습니다.
 
