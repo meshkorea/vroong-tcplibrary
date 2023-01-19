@@ -24,7 +24,7 @@ package tcp {
     interface TcpServer {
       + void start()
       + void stop()
-      + void receive(InputStream, OutputStream)
+      + byte[] receive(byte[] received)
     }
 
     abstract class AbstractTcpServer implements TcpServer {

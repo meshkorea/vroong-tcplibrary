@@ -1,8 +1,5 @@
 package com.vroong.tcp.server;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-
 public interface TcpServer {
 
   /**
@@ -23,9 +20,9 @@ public interface TcpServer {
   /**
    * Handles a message received from tcp.
    *
-   * @param reader
-   * @param writer
+   * @param received
+   * @return response
    * @throws Exception
    */
-  void receive(InputStream reader, OutputStream writer) throws Exception;
+  byte[] receive(byte[] received) throws Exception;
 }

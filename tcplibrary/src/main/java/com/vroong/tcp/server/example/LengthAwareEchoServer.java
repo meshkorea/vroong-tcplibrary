@@ -5,8 +5,6 @@ import static com.vroong.tcp.config.VroongTcpConstants.DEFAULT_CHARSET;
 import com.vroong.tcp.config.TcpServerProperties;
 import com.vroong.tcp.message.strategy.LengthAwareHeaderStrategy;
 import com.vroong.tcp.server.AbstractTcpServer;
-import java.io.InputStream;
-import java.io.OutputStream;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -26,7 +24,7 @@ public class LengthAwareEchoServer extends AbstractTcpServer {
 
   @SneakyThrows
   @Override
-  public void receive(InputStream reader, OutputStream writer) {
-    strategy.write(writer, strategy.read(reader));
+  public byte[] receive(byte[] received) {
+    return received;
   }
 }

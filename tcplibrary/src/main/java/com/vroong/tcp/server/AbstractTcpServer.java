@@ -6,8 +6,6 @@ import com.vroong.tcp.message.strategy.NullHeaderStrategy;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -73,7 +71,7 @@ public abstract class AbstractTcpServer implements TcpServer {
     this.needClientAuth = needClientAuth;
   }
 
-  public abstract void receive(InputStream reader, OutputStream writer);
+  public abstract byte[] receive(byte[] received);
 
   public void start() throws Exception {
     final ServerSocket serverSocket = serverSocketFactory.createServerSocket(port);
@@ -94,7 +92,13 @@ public abstract class AbstractTcpServer implements TcpServer {
           final BufferedInputStream reader = new BufferedInputStream(socket.getInputStream());
           final BufferedOutputStream writer = new BufferedOutputStream(socket.getOutputStream());
 
-          receive(reader, writer);
+          final byte[] received = strategy.read(reader);
+          final byte[] response = receive(received);
+          strategy.write(writer, response);
+
+          if (log.isDebugEnabled()) {
+            log.debug("receive={}, send={}", received, response);
+          }
         } catch (IOException e) {
           log.warn("{}: {}", e.getMessage(), socket.getPort());
         } finally {

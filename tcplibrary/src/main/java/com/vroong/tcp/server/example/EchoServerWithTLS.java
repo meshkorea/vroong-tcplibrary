@@ -3,8 +3,6 @@ package com.vroong.tcp.server.example;
 import com.vroong.tcp.config.TcpServerProperties;
 import com.vroong.tcp.message.strategy.NullHeaderStrategy;
 import com.vroong.tcp.server.AbstractTcpServer;
-import java.io.InputStream;
-import java.io.OutputStream;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -21,7 +19,7 @@ public class EchoServerWithTLS extends AbstractTcpServer {
 
   @SneakyThrows
   @Override
-  public void receive(InputStream reader, OutputStream writer) {
-    strategy.write(writer, strategy.read(reader));
+  public byte[] receive(byte[] received) {
+    return received;
   }
 }

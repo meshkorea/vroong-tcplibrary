@@ -93,6 +93,10 @@ public class PooledTcpClient extends AbstractTcpClient {
     strategy.write(writer, body);
     final byte[] response = strategy.read(reader);
 
+    if (log.isDebugEnabled()) {
+      log.debug("send={}, receive={}", new String(body), new String(response));
+    }
+
     clearResources(currentTuple);
 
     return response;
