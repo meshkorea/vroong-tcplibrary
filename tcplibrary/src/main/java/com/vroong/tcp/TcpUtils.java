@@ -9,7 +9,7 @@ import java.io.Reader;
 public class TcpUtils {
 
   /**
-   * Find the new line character in the given byte array.
+   * Finds whether a new line character exists in the given byte array.
    *
    * @param haystack
    * @return

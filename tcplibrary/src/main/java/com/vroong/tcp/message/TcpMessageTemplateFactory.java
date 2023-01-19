@@ -5,8 +5,8 @@ import java.util.List;
 public interface TcpMessageTemplateFactory {
 
   /**
-   * Constructs a template of TcpMessage which consists of Items and sub Packet.
-   * The shape of the object depends on the length of the tcpMessage.
+   * Provides a template of TcpMessage which consists of Items and sub Packet.
+   * The shape of the object depends on the length of the original tcpMessage.
    *
    * @param tcpMessage
    * @return

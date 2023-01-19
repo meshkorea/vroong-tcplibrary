@@ -16,7 +16,7 @@ allprojects {
     apply plugin: 'idea'
 
     group = 'com.vroong'
-    version = '0.0.1-SNAPSHOT'
+    version = '1.0.0-RELEASE'
 
     compileJava {
         sourceCompatibility = JavaVersion.VERSION_1_8

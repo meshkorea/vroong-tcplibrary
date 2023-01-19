@@ -5,6 +5,8 @@ public interface TcpMessage {
   /**
    * Name for a fragment of the TcpMessage.
    *
+   * e.g. "root", "name", "age", ...
+   *
    * @return
    */
   String getName();
@@ -12,7 +14,7 @@ public interface TcpMessage {
   void setName(String name);
 
   /**
-   * Length of the value when the TcpMessage was constructed as a fixed byte
+   * Length of the value when the TcpMessage was constructed as a fixed-length byte
    * or index number of the value when the TcpMessage was constructed by a delimiter.
    *
    * @return

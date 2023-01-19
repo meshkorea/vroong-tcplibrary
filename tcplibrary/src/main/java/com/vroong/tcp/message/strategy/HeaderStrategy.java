@@ -7,7 +7,7 @@ import java.io.OutputStream;
 public interface HeaderStrategy {
 
   /**
-   * Read message from InputStream
+   * Reads a message from the given InputStream
    *
    * @param reader
    * @return byte array which was read
@@ -16,7 +16,7 @@ public interface HeaderStrategy {
   byte[] read(InputStream reader) throws IOException;
 
   /**
-   * Write message to OutputStream
+   * Writes a message to the given OutputStream
    *
    * @param writer
    * @param body byte array to write

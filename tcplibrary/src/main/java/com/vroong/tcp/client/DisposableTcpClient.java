@@ -9,6 +9,9 @@ import java.io.OutputStream;
 import java.net.Socket;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Constructs a TcpClient that closes the socket after use.
+ */
 @Slf4j
 public class DisposableTcpClient extends AbstractTcpClient {
 

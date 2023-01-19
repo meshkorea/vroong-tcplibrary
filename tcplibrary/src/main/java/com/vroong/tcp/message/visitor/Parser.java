@@ -6,7 +6,7 @@ public interface Parser {
 
   /**
    * Deserializes value of the tcpMessage field of the Packet
-   * and then sets the Packet object's field value.
+   * and then sets the Packet object's fields' value.
    *
    * @param parseable
    */

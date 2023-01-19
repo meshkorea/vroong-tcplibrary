@@ -3,7 +3,7 @@ package com.vroong.tcp.server;
 public interface TcpServer {
 
   /**
-   * Start a Tcp server, which blocks indefinitely waiting for a client connection.
+   * Starts a Tcp server, which blocks indefinitely waiting for a client connection.
    * Once a client is connected, a new worker thread will be allocated.
    *
    * @throws Exception
@@ -11,7 +11,7 @@ public interface TcpServer {
   void start() throws Exception;
 
   /**
-   * Stops Tcp server and returns all the resources.
+   * Stops the Tcp server and returns all the resources.
    *
    * @throws Exception
    */
@@ -20,8 +20,8 @@ public interface TcpServer {
   /**
    * Handles a message received from tcp.
    *
-   * @param received
-   * @return response
+   * @param received received byte array
+   * @return byte array to respond
    * @throws Exception
    */
   byte[] receive(byte[] received) throws Exception;

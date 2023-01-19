@@ -12,7 +12,8 @@ import java.io.OutputStream;
 import java.util.Arrays;
 
 /**
- * Tcp header handling strategy, which has a new line character as the delimiter of the message
+ * Tcp header handling strategy.
+ * We assume that there is a new line character in the message as an EOF marker.
  *
  * e.g. hello world\n
  */

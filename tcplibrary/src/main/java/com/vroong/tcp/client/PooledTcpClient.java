@@ -20,6 +20,9 @@ import org.apache.commons.pool2.impl.DefaultPooledObject;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 
+/**
+ * Constructs a TcpClient that holds sockets in the pool.
+ */
 @Slf4j
 public class PooledTcpClient extends AbstractTcpClient {
 

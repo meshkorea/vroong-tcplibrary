@@ -10,7 +10,7 @@ vroong-tcplibrary는 TCP 서버 또는 클라이언트를 쉽게 구현하기 �
 - Spring Boot Auto Configuration
 
 ### Dependencies
-- Java 8
+- Java 8 or higher
 
 ### Installation
 
@@ -215,6 +215,8 @@ tcp:
 이슈, PR 보내주세요.
 
 #### Publishing Jar
+
+Nexus에 발행하기 전에 `build.gradle`을 열어 `version` 프로퍼티의 값을 변경해주세요. 
 
 ```shell
 $ ./gradlew publish
