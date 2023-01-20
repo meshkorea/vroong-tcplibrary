@@ -11,6 +11,7 @@ vroong-tcplibrary는 TCP 서버 또는 클라이언트를 쉽게 구현하기 �
 
 ### Dependencies
 - Java 8 or higher
+- Gradle 6.0 or higher
 
 ### Installation
 
