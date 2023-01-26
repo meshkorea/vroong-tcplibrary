@@ -16,12 +16,7 @@ allprojects {
     apply plugin: 'idea'
 
     group = 'com.vroong'
-    version = '1.0.0-RELEASE'
-
-    compileJava {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
+    version = '2.0.1-RELEASE'
 
     repositories {
         mavenCentral()
