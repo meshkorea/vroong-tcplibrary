@@ -15,6 +15,11 @@ vroong-tcplibrary는 TCP 서버 또는 클라이언트를 쉽게 구현하기 �
 
 ### Installation
 
+Spring Boot Version|Java Version|`vroongTcpLibraryVersion`
+---|---|---
+~2.7|1.8~|1.x.x
+3.0~|17~|2.x.x
+
 프로젝트에 다음과 같이 의존을 설정합니다.
 
 ```groovy
