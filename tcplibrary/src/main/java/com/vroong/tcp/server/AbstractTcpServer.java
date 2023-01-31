@@ -95,7 +95,7 @@ public abstract class AbstractTcpServer implements TcpServer {
 
       final Socket socket = acceptedScoket;
       socketHolder.get().add(socket);
-      log.info("A connection established to port {}", socket.getPort());
+      log.info("A connection established with {}", socket.getRemoteSocketAddress());
 
       CompletableFuture.runAsync(() -> {
         try {
@@ -115,6 +115,7 @@ public abstract class AbstractTcpServer implements TcpServer {
           // TODO: 클라이언트가 PooledTcpClient를 사용할 경우에 대한 처리 필요
           try {
             socket.close();
+            log.info("A connection with {} is closed", socket.getRemoteSocketAddress());
           } catch (IOException e) {
             log.error(String.format("Connection to port %s was not closed", socket.getPort()));
           }
