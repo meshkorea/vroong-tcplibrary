@@ -8,6 +8,7 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -83,7 +84,16 @@ public abstract class AbstractTcpServer implements TcpServer {
     log.info("Tcp server is listening at port {}", port);
 
     while (true) {
-      final Socket socket = serverSocket.accept(); // 여기서 블록킹하고 있다가, 클라이언트가 접속하면 해제됨
+      Socket acceptedScoket = null;
+      try {
+        acceptedScoket = serverSocket.accept(); // 여기서 블록킹하고 있다가, 클라이언트가 접속하면 해제됨
+      } catch (SocketException ignored) {
+        // When closing the ServerSocket, the blocking thread will throw a SocketException.
+        // https://docs.oracle.com/javase/7/docs/api/java/net/ServerSocket.html#close()
+        return;
+      }
+
+      final Socket socket = acceptedScoket;
       socketHolder.get().add(socket);
       log.info("A connection established to port {}", socket.getPort());
 
