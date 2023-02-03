@@ -17,6 +17,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.net.ServerSocketFactory;
+import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import lombok.extern.slf4j.Slf4j;
@@ -95,7 +96,9 @@ public abstract class AbstractTcpServer implements TcpServer {
 
       final Socket socket = acceptedScoket;
       socketHolder.get().add(socket);
-      log.info("A connection established with {}", socket.getRemoteSocketAddress());
+      if (log.isDebugEnabled()) {
+        log.debug("A connection established with {}", socket.getRemoteSocketAddress());
+      }
 
       CompletableFuture.runAsync(() -> {
         try {
@@ -109,13 +112,18 @@ public abstract class AbstractTcpServer implements TcpServer {
           if (log.isDebugEnabled()) {
             log.debug("receive={}, send={}", received, response);
           }
+        } catch (SSLHandshakeException ignored) {
+          // Note. sun.security.ssl.SSLSocketImpl#readHandshakeRecord:1429 throws SSLHandshakeException
+          // Ignored to avoid WARN log: "Remote host terminated the handshake"
         } catch (IOException e) {
           log.warn("{}: {}", e.getMessage(), socket.getPort());
         } finally {
           // TODO: 클라이언트가 PooledTcpClient를 사용할 경우에 대한 처리 필요
           try {
             socket.close();
-            log.info("A connection with {} is closed", socket.getRemoteSocketAddress());
+            if (log.isDebugEnabled()) {
+              log.debug("A connection with {} is closed", socket.getRemoteSocketAddress());
+            }
           } catch (IOException e) {
             log.error(String.format("Connection to port %s was not closed", socket.getPort()));
           }
