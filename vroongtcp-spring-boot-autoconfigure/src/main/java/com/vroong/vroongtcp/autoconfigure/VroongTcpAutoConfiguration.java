@@ -33,7 +33,7 @@ public class VroongTcpAutoConfiguration {
     return new DisposableTcpClient(tcpClientProperties, headerStrategy, false);
   }
 
-  @Bean
+  @Bean("tcp")
   @ConditionalOnProperty(value = "tcp.server.health.enabled", havingValue = "true")
   @ConditionalOnClass(HealthIndicator.class)
   HealthIndicator health(TcpServerProperties serverProperties) {
