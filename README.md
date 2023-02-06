@@ -58,6 +58,8 @@ public class YourService {
 
 ### Usage: Server<a id="server-usage"></a>
 
+> TcpServer에 대한 헬스체크를 활성화하려면 `tcp.server.health.enabled` 프로퍼티 값을 true로 제공해야 합니다.
+
 `AbstractTcpServer`를 구현합니다. TLS를 사용하는 경우 반드시 인증서 위치를 `application.yml`에 명시해야 하며, `YourTcpServer(TcpServerProperties properties, HeaderStrategy headerStrategy, Boolean useTLS, Boolean needClientAuth)` 생성자를 사용해야 합니다.
 
 ```java
@@ -191,6 +193,7 @@ public class TcpConfiguration {
 
 tcp:
   server:
+    health.enabled: false
     port: 65535
     maxConnection: 100
     keyStore: ${user.dir}/src/main/resources/keystore-for-server.jks
