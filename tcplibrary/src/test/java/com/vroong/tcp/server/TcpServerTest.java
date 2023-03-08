@@ -1,16 +1,17 @@
-package com.vroong.tcp.client;
+package com.vroong.tcp.server;
 
-import static com.vroong.tcp.config.VroongTcpConstants.DEFAULT_CHARSET;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.vroong.tcp.TestHelper;
+import com.vroong.tcp.client.DisposableTcpClient;
+import com.vroong.tcp.client.PooledTcpClient;
 import com.vroong.tcp.client.PooledTcpClient.Tuple;
+import com.vroong.tcp.client.TcpClient;
 import com.vroong.tcp.config.TcpClientProperties;
 import com.vroong.tcp.config.TcpClientProperties.Pool;
 import com.vroong.tcp.config.TcpServerProperties;
 import com.vroong.tcp.server.example.EchoServer;
 import java.lang.reflect.Method;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -21,70 +22,38 @@ import java.util.concurrent.TimeUnit;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.pool2.ObjectPool;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.TestInstance.Lifecycle;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.platform.commons.util.ReflectionUtils;
 
 @Slf4j
-@TestInstance(Lifecycle.PER_CLASS)
-class TcpClientTest {
+class TcpServerTest {
+
+  final String message = "안녕하세요?";
 
   TestHelper libraryTest = new TestHelper();
-
   TcpServerProperties serverProperties = libraryTest.getServerProperties();
   TcpClientProperties clientProperties = libraryTest.getClientProperties();
   Pool poolConfig = clientProperties.getPool();
 
   EchoServer server = new EchoServer(serverProperties);
 
-  @ParameterizedTest
-  @ValueSource(strings = {"utf-8", "euc-kr", "cp949"})
-  void disposableTcpClient(String charsetName) throws Exception {
-    final Charset charset = Charset.forName(charsetName);
-
+  @Test
+  void whenKeepConnectionIsFalse() throws Exception {
+    startServer(false);
     final TcpClient client = new DisposableTcpClient(clientProperties);
-
-    final String message = "안녕하세요?";
-    final byte[] response = client.send(message.getBytes(charset));
-
-    assertEquals(message, new String(response, charset));
-  }
-
-  @ParameterizedTest
-  @ValueSource(strings = {"utf-8", "euc-kr", "cp949"})
-  void pooledTcpClient(String charsetName) throws Exception {
-    final Charset charset = Charset.forName(charsetName);
-
-    final TcpClient client = new PooledTcpClient(clientProperties);
-
-    final ObjectPool<Tuple> pool = getPool(client);
-    assertEquals(poolConfig.getMinIdle(), pool.getNumIdle());
-
-    final String message = "안녕하세요?";
-    final byte[] response = client.send(message.getBytes(charset));
-
-    assertEquals(message, new String(response, charset));
-    assertEquals(poolConfig.getMinIdle(), pool.getNumIdle());
-    assertEquals(0, pool.getNumActive());
-    log.info("response: {}", new String(response, charset));
+    final byte[] received = client.send(message.getBytes());
+    assertEquals(message, new String(received));
   }
 
   @Test
-    // 동시성 문제가 있지만, 완전 못쓸 수준을 아니라 판단함
-    // spring-data-redis 등도 apache.commons.pool2를 사용함
-  void pooledTcpClient_underMultiThreads() {
-    final Charset charset = DEFAULT_CHARSET;
+  void whenKeepConnectionIsTrue() {
+    startServer(true);
 
     final TcpClient client = new PooledTcpClient(clientProperties);
     final ObjectPool<Tuple> pool = getPool(client);
     final int noOfTests = poolConfig.getMinIdle();
     final Executor executor = Executors.newFixedThreadPool(noOfTests);
-    final String message = "안녕하세요?";
 
     final List<CompletableFuture<byte[]>> futures = new ArrayList<>();
     for (int i = 0; i < noOfTests; i++) {
@@ -93,7 +62,7 @@ class TcpClientTest {
           log.info("Sending message in a thread, pool state: numIdle={}, numActive={}",
               pool.getNumIdle(),
               pool.getNumActive());
-          return client.send(message.getBytes(charset));
+          return client.send(message.getBytes());
         } catch (Exception e) {
           log.error(e.getMessage());
         }
@@ -113,7 +82,7 @@ class TcpClientTest {
     futures
         .forEach(f -> {
           try {
-            log.info("response: {}", new String(f.get(), charset));
+            log.info("response: {}", new String(f.get()));
           } catch (Exception ignored) {
           }
         });
@@ -129,10 +98,10 @@ class TcpClientTest {
   }
 
   @SneakyThrows
-  @BeforeAll
-  void setUp() {
+  void startServer(boolean keepConnection) {
     new Thread(() -> {
       try {
+        server.setKeepConnection(keepConnection);
         server.start();
       } catch (Exception ignored) {
       }
@@ -142,7 +111,7 @@ class TcpClientTest {
   }
 
   @SneakyThrows
-  @AfterAll
+  @AfterEach
   void shutDown() {
     TimeUnit.SECONDS.sleep(3);
     server.stop();

@@ -86,7 +86,7 @@ class LengthAwareTcpClientTest {
 
     final TcpClient client = new PooledTcpClient(clientProperties, strategy, false);
     final ObjectPool<Tuple> pool = getPool(client);
-    final int noOfTests = poolConfig.getMaxTotal();
+    final int noOfTests = poolConfig.getMinIdle();
     final Executor executor = Executors.newFixedThreadPool(noOfTests);
     final String message = "안녕하세요?";
 

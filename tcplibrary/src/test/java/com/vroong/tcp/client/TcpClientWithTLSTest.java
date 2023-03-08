@@ -83,7 +83,7 @@ class TcpClientWithTLSTest {
 
     final TcpClient client = new PooledTcpClient(clientProperties, new NullHeaderStrategy(), true);
     final ObjectPool<Tuple> pool = getPool(client);
-    final int noOfTests = poolConfig.getMaxTotal();
+    final int noOfTests = poolConfig.getMinIdle();
     final Executor executor = Executors.newFixedThreadPool(noOfTests);
     final String message = "안녕하세요?";
 

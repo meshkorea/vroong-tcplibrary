@@ -20,10 +20,14 @@ import javax.net.ServerSocketFactory;
 import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public abstract class AbstractTcpServer implements TcpServer {
+
+  @Setter
+  private boolean keepConnection;
 
   protected final int port;
   protected final ExecutorService executor;
@@ -113,19 +117,21 @@ public abstract class AbstractTcpServer implements TcpServer {
             log.debug("receive={}, send={}", received, response);
           }
         } catch (SSLHandshakeException ignored) {
-          // Note. sun.security.ssl.SSLSocketImpl#readHandshakeRecord:1429 throws SSLHandshakeException
-          // Ignored to avoid WARN log: "Remote host terminated the handshake"
+          // Note: The following exceptional situation happens when the server is shutting down:
+          //   sun.security.ssl.SSLSocketImpl#readHandshakeRecord:1429 throws SSLHandshakeException
+          //   Remote host terminated the handshake...
         } catch (IOException e) {
           log.warn("{}: {}", e.getMessage(), socket.getPort());
         } finally {
-          // TODO: 클라이언트가 PooledTcpClient를 사용할 경우에 대한 처리 필요
-          try {
-            socket.close();
-            if (log.isDebugEnabled()) {
-              log.debug("A connection with {} is closed", socket.getRemoteSocketAddress());
+          if (!keepConnection) {
+            try {
+              socket.close();
+              if (log.isDebugEnabled()) {
+                log.debug("A connection with {} is closed", socket.getRemoteSocketAddress());
+              }
+            } catch (IOException e) {
+              log.error(String.format("Connection to port %s was not closed", socket.getPort()));
             }
-          } catch (IOException e) {
-            log.error(String.format("Connection to port %s was not closed", socket.getPort()));
           }
         }
       }, executor);

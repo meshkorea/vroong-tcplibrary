@@ -1,11 +1,13 @@
 package com.vroong.tcp.client;
 
 import com.vroong.tcp.config.TcpClientProperties;
+import com.vroong.tcp.config.VroongTcpConstants;
 import com.vroong.tcp.message.strategy.HeaderStrategy;
 import com.vroong.tcp.message.strategy.NullHeaderStrategy;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.nio.charset.Charset;
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocketFactory;
 import lombok.Getter;
@@ -14,6 +16,9 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public abstract class AbstractTcpClient implements TcpClient {
+
+  @Setter
+  protected Charset charset = VroongTcpConstants.DEFAULT_CHARSET;
 
   protected final HeaderStrategy strategy;
 
