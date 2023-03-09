@@ -9,13 +9,12 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 import javax.net.ServerSocketFactory;
 import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLServerSocket;
@@ -33,11 +32,10 @@ public abstract class AbstractTcpServer implements TcpServer {
   protected final ExecutorService executor;
   protected final HeaderStrategy strategy;
 
-  protected final AtomicReference<ServerSocket> serverSocketHolder = new AtomicReference<>();
-  protected final AtomicReference<List<Socket>> socketHolder = new AtomicReference<>(new ArrayList<>());
+  protected ServerSocket serverSocket;
+  protected final Map<Socket, Socket> socketHolder = new ConcurrentHashMap<>();
 
   private final ServerSocketFactory serverSocketFactory;
-
   private final boolean needClientAuth;
 
   public AbstractTcpServer(TcpServerProperties properties) {
@@ -80,12 +78,11 @@ public abstract class AbstractTcpServer implements TcpServer {
   public abstract byte[] receive(byte[] received);
 
   public void start() throws Exception {
-    final ServerSocket serverSocket = serverSocketFactory.createServerSocket(port);
+    this.serverSocket = serverSocketFactory.createServerSocket(port);
     if (serverSocket instanceof SSLServerSocket) {
       ((SSLServerSocket)serverSocket).setNeedClientAuth(needClientAuth);
     }
 
-    this.serverSocketHolder.set(serverSocket);
     log.info("Tcp server is listening at port {}", port);
 
     while (true) {
@@ -99,7 +96,7 @@ public abstract class AbstractTcpServer implements TcpServer {
       }
 
       final Socket socket = acceptedScoket;
-      socketHolder.get().add(socket);
+      socketHolder.putIfAbsent(socket, socket);
       if (log.isDebugEnabled()) {
         log.debug("A connection established with {}", socket.getRemoteSocketAddress());
       }
@@ -133,6 +130,10 @@ public abstract class AbstractTcpServer implements TcpServer {
               log.error(String.format("Connection to port %s was not closed", socket.getPort()));
             }
           }
+
+          if (socketHolder.containsKey(socket)) {
+            socketHolder.remove(socket);
+          }
         }
       }, executor);
     }
@@ -140,7 +141,8 @@ public abstract class AbstractTcpServer implements TcpServer {
 
   public void stop() throws Exception {
     if (socketHolder != null) {
-      socketHolder.get().forEach(socket -> {
+      socketHolder.entrySet().forEach(entry -> {
+        final Socket socket = entry.getValue();
         try {
           socket.close();
         } catch (IOException e) {
@@ -149,9 +151,7 @@ public abstract class AbstractTcpServer implements TcpServer {
       });
     }
 
-    if (serverSocketHolder != null && serverSocketHolder.get() != null) {
-      serverSocketHolder.get().close();
-    }
+    serverSocket.close();
 
     executor.awaitTermination(5, TimeUnit.SECONDS);
     executor.shutdown();

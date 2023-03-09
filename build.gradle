@@ -16,7 +16,7 @@ allprojects {
     apply plugin: 'idea'
 
     group = 'com.vroong'
-    version = '2.0.9-RELEASE'
+    version = '2.0.11-RELEASE'
 
     repositories {
         mavenCentral()
