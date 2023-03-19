@@ -1,6 +1,6 @@
 plugins {
-	id 'java-library'
 	id 'io.freefair.lombok' version '6.3.0'
+    id 'io.freefair.maven-optional'
 }
 
 apply from: '../gradle/publishing.gradle'
@@ -13,8 +13,8 @@ def loggers = [
 ]
 
 dependencies {
-	implementation 'org.apache.commons:commons-pool2:2.11.1'
-	implementation loggers
+	optional 'org.apache.commons:commons-pool2:2.11.1'
+	optional loggers
 
 	testImplementation 'org.yaml:snakeyaml:1.33'
 	testImplementation loggers

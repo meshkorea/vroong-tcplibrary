@@ -1,5 +1,7 @@
-apply plugin: 'org.springframework.boot'
-apply plugin: 'io.spring.dependency-management'
+plugins {
+    id 'org.springframework.boot'
+    id 'io.spring.dependency-management'
+}
 
 sourceCompatibility = '17'
 
@@ -16,7 +18,7 @@ repositories {
 
 dependencies {
     // Replace with actual dependency "com.vroong:vroongtcp-spring-boot-starter:0.0.1-SNAPSHOT"
-    implementation project(':vroongtcp-spring-boot-starter')
+    api project(':vroongtcp-spring-boot-starter')
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
