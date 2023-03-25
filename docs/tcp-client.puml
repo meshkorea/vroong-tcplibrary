@@ -44,7 +44,7 @@ package message {
       - Charset charset
     }
 
-    class NullHeaderStrategy implements HeaderStrategy
+    class NoOpHeaderStrategy implements HeaderStrategy
   }
 
   package visitor {

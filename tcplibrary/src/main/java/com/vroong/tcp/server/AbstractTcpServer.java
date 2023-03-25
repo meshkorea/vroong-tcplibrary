@@ -2,7 +2,13 @@ package com.vroong.tcp.server;
 
 import com.vroong.tcp.config.TcpServerProperties;
 import com.vroong.tcp.message.strategy.HeaderStrategy;
-import com.vroong.tcp.message.strategy.NullHeaderStrategy;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+
+import javax.net.ServerSocketFactory;
+import javax.net.ssl.SSLHandshakeException;
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLServerSocketFactory;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
@@ -10,17 +16,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import javax.net.ServerSocketFactory;
-import javax.net.ssl.SSLHandshakeException;
-import javax.net.ssl.SSLServerSocket;
-import javax.net.ssl.SSLServerSocketFactory;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
+import java.util.concurrent.*;
 
 @Slf4j
 public abstract class AbstractTcpServer implements TcpServer {
@@ -28,18 +24,17 @@ public abstract class AbstractTcpServer implements TcpServer {
   @Setter
   private boolean keepConnection;
 
-  protected final int port;
-  protected final ExecutorService executor;
-  protected final HeaderStrategy strategy;
-
-  protected ServerSocket serverSocket;
-  protected final Map<Socket, Socket> socketHolder = new ConcurrentHashMap<>();
-
+  private final int port;
+  private final ExecutorService executor;
+  private final HeaderStrategy strategy;
   private final ServerSocketFactory serverSocketFactory;
   private final boolean needClientAuth;
 
-  public AbstractTcpServer(TcpServerProperties properties) {
-    this(properties, new NullHeaderStrategy(), false, false);
+  private ServerSocket serverSocket;
+  private final Map<Socket, Socket> socketHolder = new ConcurrentHashMap<>();
+
+  public AbstractTcpServer(TcpServerProperties properties, HeaderStrategy strategy) {
+    this(properties, strategy, false, false);
   }
 
   /**
@@ -75,7 +70,7 @@ public abstract class AbstractTcpServer implements TcpServer {
     this.needClientAuth = needClientAuth;
   }
 
-  public abstract byte[] receive(byte[] received);
+  public abstract String receive(String received);
 
   public void start() throws Exception {
     this.serverSocket = serverSocketFactory.createServerSocket(port);
@@ -103,12 +98,12 @@ public abstract class AbstractTcpServer implements TcpServer {
 
       CompletableFuture.runAsync(() -> {
         try {
-          final BufferedInputStream reader = new BufferedInputStream(socket.getInputStream());
-          final BufferedOutputStream writer = new BufferedOutputStream(socket.getOutputStream());
+          final BufferedInputStream input = new BufferedInputStream(socket.getInputStream());
+          final BufferedOutputStream output = new BufferedOutputStream(socket.getOutputStream());
 
-          final byte[] received = strategy.read(reader);
-          final byte[] response = receive(received);
-          strategy.write(writer, response);
+          final String received = strategy.read(input);
+          final String response = receive(received);
+          strategy.write(output, response);
 
           if (log.isDebugEnabled()) {
             log.debug("receive={}, send={}", received, response);

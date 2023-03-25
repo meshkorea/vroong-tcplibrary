@@ -16,7 +16,7 @@ package tcp {
         - Charset charset
       }
 
-      class NullHeaderStrategy implements HeaderStrategy
+      class NoOpHeaderStrategy implements HeaderStrategy
     }
   }
 

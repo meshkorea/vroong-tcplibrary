@@ -20,9 +20,9 @@ public interface TcpServer {
   /**
    * Handles a message received from tcp.
    *
-   * @param received received byte array
-   * @return byte array to respond
+   * @param received received message
+   * @return message to respond
    * @throws Exception
    */
-  byte[] receive(byte[] received) throws Exception;
+  String receive(String received) throws Exception;
 }

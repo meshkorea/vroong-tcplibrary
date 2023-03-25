@@ -13,9 +13,9 @@ tcplibrary/src/main/java/com/vroong/tcp
 
 #### HeaderStrategy
 
-`HeaderStrategy`는 Tcp 메시지를 보내고 받을 때, 메시지 헤더를 어떻게 구성할 것인가에 대한 전략입니다. `NullHeaderStrategy`는 줄바꿈 문자로 메시지가 구분된다고 가정합니다. `LengthAwareHeaderStrategy`는 메시지 본문 앞에 헤더 자신의 길이를 포함한 전체 메시지 길이를 명시하고 있다고 가정합니다.
+`HeaderStrategy`는 Tcp 메시지를 보내고 받을 때, 메시지 헤더를 어떻게 구성할 것인가에 대한 전략입니다. `NoOpHeaderStrategy`는 줄바꿈 문자로 메시지가 구분된다고 가정합니다. `LengthAwareHeaderStrategy`는 메시지 본문 앞에 헤더 자신의 길이를 포함한 전체 메시지 길이를 명시하고 있다고 가정합니다.
 
-가령, "안녕하세요\n"와 같은 메시지를 주고 받으려면 `NullHeaderStrategy`를 사용하고, 메시지가 "0019안녕하세요"와 같다면 `LengthAwareHeaderStrategy`를 사용할 수 있습니다. 기본 구현에서 제공하지 않는 전략이 필요하다면 `HeaderStrategy`를 직접 구현할 수 있습니다.
+가령, "안녕하세요\n"와 같은 메시지를 주고 받으려면 `NoOpHeaderStrategy`를 사용하고, 메시지가 "0019안녕하세요"와 같다면 `LengthAwareHeaderStrategy`를 사용할 수 있습니다. 기본 구현에서 제공하지 않는 전략이 필요하다면 `HeaderStrategy`를 직접 구현할 수 있습니다.
 
 ![](https://plantuml-server.kkeisuke.dev/svg/ZL91RiCW4BppYZtQQlo5AbKkhLIrX_HMvK1WQoDXZ9Qr8olAtqlNhKoY77e2PfUPsO5jOaqyzbuf5nZfInk4PzGMQS-a6TiPpWhW0Oupu-S1ADUgbn17pdNKlG18jVHCWxDm8iTOlO-yzWX4cp-Eus3dMbsKCbwd1AyOMkwUJfhmHjdrqMEFWTCzJmtaemij-AZjhjCaM1u3EcbUU0NygIPaCCkwQh-DtlzVz5Acz67Y7cb2-Wr8XfSugxe4XbYU2Gsw2Si8Dr269S5SgUoyoswkdo5XiDMobmkhcQPvlF6jLeuxHRNDLFa3V0C0.svg)
 
@@ -33,14 +33,17 @@ TCP를 통해 메시지를 주고 받을 때, 발신자와 수신자의 신원 �
 #### Plain Socket
 
 ```java
-final TcpClient client = new DisposableTcpClient(new TcpClientProperties());
+final TcpClient client = new DisposableTcpClient(new TcpClientProperties(),
+    new NoOpHeaderStrategy(StandardCharsets.UTF_8));
 // 메시지가 줄바꿈 문자로 끝나는 케이스
-// final TcpClient client = new DisposableTcpClient(new TcpClientProperties(), new NullHeaderStrategy(), false);
+// final TcpClient client = new DisposableTcpClient(new TcpClientProperties(),
+//     new NoOpHeaderStrategy(StandardCharsets.UTF_8), false);
 // 메시지 헤더에 전체 메시지의 길이가 명시된 케이스
-// final TcpClient client = new DisposableTcpClient(new TcpClientProperties(), new LengthAwareHeaderStrategy(), false);
+// final TcpClient client = new DisposableTcpClient(new TcpClientProperties(),
+//     new LengthAwareHeaderStrategy('0', 4, StandardCharsets.UTF_8), false);
 
 final String message = "안녕하세요?";
-final byte[] response = client.send(message.getBytes());
+final String response = client.send(message);
 ```
 - Socket Pool을 사용하는 경우 `TcpClient` 구현체를 `PooledTcpClient`를 사용
 
@@ -48,12 +51,12 @@ final byte[] response = client.send(message.getBytes());
 #### Secure Socket
 
 ```java
-final TcpClient client = new DisposableTcpClient(new TcpClientProperties(), new NullHeaderStrategy(), true);
+final TcpClient client = new DisposableTcpClient(new TcpClientProperties(), new NoOpHeaderStrategy(), true);
 // 메시지 헤더에 전체 메시지의 길이가 명시된 케이스
 // final TcpClient client = new DisposableTcpClient(new TcpClientProperties(), new LengthAwareHeaderStrategy(), true);
 
 final String message = "안녕하세요?";
-final byte[] response = client.send(message.getBytes());
+final String response = client.send(message);
 ```
 - `PooledTcpClient`를 사용하는 경우 `TcpClient` 구현체를 `PooledTcpClient`를 사용
 
@@ -63,13 +66,13 @@ final byte[] response = client.send(message.getBytes());
 
 ```java
 public class YourTcpServer extends AbstractTcpServer {
-  public YourTcpServer(TcpServerProperties properties) {
-    super(properties);
+  public YourTcpServer(TcpServerProperties properties, HeaderStrategy strategy) {
+    super(properties, strategy);
   }
   
   @Override
-  public byte[] receive(byte[] received) {
-    byte[] response = null;
+  public String receive(String received) {
+    String response = null;
     // Your implementation here...
     return response;
   }
@@ -81,13 +84,13 @@ public class YourTcpServer extends AbstractTcpServer {
 
 ```java
 public class YourSecureTcpServer extends AbstractTcpServer {
-  public YourSecureTcpServer(TcpServerProperties properties) {
-    super(properties, new NullHeaderStrategy(), true, true);
+  public YourSecureTcpServer(TcpServerProperties properties, HeaderStrategy strategy) {
+    super(properties, strategy, true, true);
   }
 
   @Override
-  public byte[] receive(byte[] received) {
-    byte[] response = null;
+  public String receive(String received) {
+    String response = null;
     // Your implementation here...
     return response;
   }

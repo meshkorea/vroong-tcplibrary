@@ -9,18 +9,18 @@ public interface HeaderStrategy {
   /**
    * Reads a message from the given InputStream
    *
-   * @param reader
-   * @return byte array which was read
+   * @param input
+   * @return String representation of message received via InputStream
    * @throws IOException
    */
-  byte[] read(InputStream reader) throws IOException;
+  String read(InputStream input) throws IOException;
 
   /**
    * Writes a message to the given OutputStream
    *
-   * @param writer
-   * @param body byte array to write
+   * @param output
+   * @param body Stringified message to send via OutputStream
    * @throws IOException
    */
-  void write(OutputStream writer, byte[] body) throws IOException;
+  void write(OutputStream output, String body) throws IOException;
 }

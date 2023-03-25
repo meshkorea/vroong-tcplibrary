@@ -5,9 +5,9 @@ public interface TcpClient {
   /**
    * Sends a message via tcp.
    *
-   * @param message byte array to send
-   * @return byte array received
+   * @param message to send
+   * @return message received
    * @throws Exception
    */
-  byte[] send(byte[] message) throws Exception;
+  String send(String message) throws Exception;
 }
