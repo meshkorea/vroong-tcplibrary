@@ -2,8 +2,9 @@ package com.vroong.vroongtcp.autoconfigure;
 
 import com.vroong.tcp.client.DisposableTcpClient;
 import com.vroong.tcp.client.TcpClient;
+import com.vroong.tcp.config.VroongTcpConstants;
 import com.vroong.tcp.message.strategy.HeaderStrategy;
-import com.vroong.tcp.message.strategy.NullHeaderStrategy;
+import com.vroong.tcp.message.strategy.NoOpHeaderStrategy;
 import java.io.IOException;
 import java.net.Socket;
 import org.springframework.boot.actuate.health.AbstractHealthIndicator;
@@ -23,8 +24,8 @@ public class VroongTcpAutoConfiguration {
 
   @Bean
   @ConditionalOnMissingBean
-  HeaderStrategy nullHeaderStrategy() {
-    return new NullHeaderStrategy();
+  HeaderStrategy headerStrategy() {
+    return new NoOpHeaderStrategy(VroongTcpConstants.DEFAULT_CHARSET);
   }
 
   @Bean

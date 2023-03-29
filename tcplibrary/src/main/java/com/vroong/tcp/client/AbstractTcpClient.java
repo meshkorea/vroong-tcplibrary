@@ -1,43 +1,29 @@
 package com.vroong.tcp.client;
 
 import com.vroong.tcp.config.TcpClientProperties;
-import com.vroong.tcp.config.VroongTcpConstants;
 import com.vroong.tcp.message.strategy.HeaderStrategy;
-import com.vroong.tcp.message.strategy.NullHeaderStrategy;
+import lombok.extern.slf4j.Slf4j;
+
+import javax.net.SocketFactory;
+import javax.net.ssl.SSLSocketFactory;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.nio.charset.Charset;
-import javax.net.SocketFactory;
-import javax.net.ssl.SSLSocketFactory;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public abstract class AbstractTcpClient implements TcpClient {
 
-  @Setter
-  protected Charset charset = VroongTcpConstants.DEFAULT_CHARSET;
-
   protected final HeaderStrategy strategy;
 
-  @Getter
   private final String host;
-
-  @Getter
   private final int port;
-
-  @Setter
   private int connectionTimeout;
-
-  @Setter
   private int readTimeout;
 
   private final SocketFactory socketFactory;
 
-  public AbstractTcpClient(TcpClientProperties properties) {
-    this(properties, new NullHeaderStrategy(), false);
+  public AbstractTcpClient(TcpClientProperties properties, HeaderStrategy strategy) {
+    this(properties, strategy, false);
   }
 
   /**
@@ -49,7 +35,6 @@ public abstract class AbstractTcpClient implements TcpClient {
    */
   public AbstractTcpClient(TcpClientProperties properties, HeaderStrategy strategy, boolean useTLS) {
     this.strategy = strategy;
-
     this.host = properties.getHost();
     this.port = properties.getPort();
     this.connectionTimeout = properties.getConnectionTimeout();
@@ -74,7 +59,7 @@ public abstract class AbstractTcpClient implements TcpClient {
   }
 
   @Override
-  public abstract byte[] send(byte[] message) throws Exception;
+  public abstract String send(String message) throws Exception;
 
   protected Socket createSocket() throws Exception {
     final Socket socket = socketFactory.createSocket();

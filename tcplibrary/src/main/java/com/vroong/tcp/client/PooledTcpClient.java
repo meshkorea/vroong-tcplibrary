@@ -2,6 +2,7 @@ package com.vroong.tcp.client;
 
 import com.vroong.tcp.config.TcpClientProperties;
 import com.vroong.tcp.message.strategy.HeaderStrategy;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.InputStream;
@@ -29,8 +30,8 @@ public class PooledTcpClient extends AbstractTcpClient {
   @Getter(AccessLevel.PRIVATE)
   private ObjectPool<Tuple> pool;
 
-  public PooledTcpClient(TcpClientProperties properties) {
-    super(properties);
+  public PooledTcpClient(TcpClientProperties properties, HeaderStrategy strategy) {
+    super(properties, strategy);
     initPool(properties);
   }
 
@@ -44,10 +45,9 @@ public class PooledTcpClient extends AbstractTcpClient {
       @Override
       public Tuple create() throws Exception {
         final Socket socket = createSocket();
-        final BufferedOutputStream writer = new BufferedOutputStream(socket.getOutputStream());
-        final BufferedInputStream reader = new BufferedInputStream(socket.getInputStream());
 
-        return new Tuple(socket, writer, reader);
+        return new Tuple(socket, new BufferedOutputStream(socket.getOutputStream()),
+            new BufferedInputStream(socket.getInputStream()));
       }
 
       @Override
@@ -88,16 +88,16 @@ public class PooledTcpClient extends AbstractTcpClient {
   }
 
   @Override
-  public byte[] send(byte[] body) throws Exception {
+  public String send(String body) throws Exception {
     final Tuple currentTuple = pool.borrowObject();
-    final OutputStream writer = currentTuple.getWriter();
-    final InputStream reader = currentTuple.getReader();
+    final OutputStream output = currentTuple.getOutputStream();
+    final InputStream input = currentTuple.getInputStream();
 
-    strategy.write(writer, body);
-    final byte[] response = strategy.read(reader);
+    strategy.write(output, body);
+    final String response = strategy.read(input);
 
     if (log.isDebugEnabled()) {
-      log.debug("send={}, receive={}", new String(body, charset), new String(response, charset));
+      log.debug("send={}, receive={}", body, response);
     }
 
     clearResources(currentTuple);
@@ -126,7 +126,7 @@ public class PooledTcpClient extends AbstractTcpClient {
   public static class Tuple {
 
     private Socket socket;
-    private OutputStream writer;
-    private InputStream reader;
+    private OutputStream outputStream;
+    private InputStream inputStream;
   }
 }

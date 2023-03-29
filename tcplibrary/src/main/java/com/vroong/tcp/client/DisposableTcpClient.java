@@ -2,12 +2,11 @@ package com.vroong.tcp.client;
 
 import com.vroong.tcp.config.TcpClientProperties;
 import com.vroong.tcp.message.strategy.HeaderStrategy;
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.Socket;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * Constructs a TcpClient that closes the socket after use.
@@ -15,8 +14,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class DisposableTcpClient extends AbstractTcpClient {
 
-  public DisposableTcpClient(TcpClientProperties properties) {
-    super(properties);
+  public DisposableTcpClient(TcpClientProperties properties, HeaderStrategy strategy) {
+    super(properties, strategy);
   }
 
   public DisposableTcpClient(TcpClientProperties properties, HeaderStrategy strategy, boolean useTLS) {
@@ -24,16 +23,14 @@ public class DisposableTcpClient extends AbstractTcpClient {
   }
 
   @Override
-  public byte[] send(byte[] body) throws Exception {
+  public String send(String body) throws Exception {
     final Socket socket = createSocket();
-    final OutputStream writer = new BufferedOutputStream(socket.getOutputStream());
-    final InputStream reader = new BufferedInputStream(socket.getInputStream());
 
-    strategy.write(writer, body);
-    final byte[] response = strategy.read(reader);
+    strategy.write(new BufferedOutputStream(socket.getOutputStream()), body);
+    final String response = strategy.read(new BufferedInputStream(socket.getInputStream()));
 
     if (log.isDebugEnabled()) {
-      log.debug("send={}, receive={}", new String(body, charset), new String(response, charset));
+      log.debug("send={}, receive={}", body, response);
     }
 
     clearResources(socket);

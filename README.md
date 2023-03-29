@@ -50,7 +50,7 @@ public class YourService {
   }
 
   public String yourServiceMethod(String message) {
-    byte[] response = tcpClient.send(message.getBytes());
+    String response = tcpClient.send(message);
     return new String(response);
   }
 }
@@ -77,8 +77,8 @@ public class YourTcpServer extends AbstractTcpServer {
 //  }
   
   @Override
-  public byte[] receive(byte[] received) {
-    byte[] response = null;
+  public String receive(String received) {
+    String response = null;
     // your implementation here to set the value of response variable...
     return response;
   }
@@ -126,7 +126,7 @@ Bean|Required|Default
 ---|---|---
 `TcpServer`<sup>(1)</sup>|true|N/A 
 `TcpClient`<sup>(2)</sup>|false|`DisposableTcpClient`
-`HeaderStrategy`|false|`NullHeaderStrategy`
+`HeaderStrategy`|false|`NoOpHeaderStrategy`
 
 (1) `AbstractTcpServer`를 구현해야 하여 `@Bean`으로 등록해야 합니다. [Usege: Server](#server-usage) 참조  
 (2) TLS를 사용하는 경우 인증서 위치를 `application.yml`에 명시해야 하며, `xxxTcpClient(TcpClientProperties properties, HeaderStrategy strategy, Boolean useTLS)` 생성자를 사용해서 `TcpClient`를 `@Bean`으로 등록해야 합니다.
@@ -178,7 +178,7 @@ public class TcpConfiguration {
     return new LengthAwareHeaderStrategy('0', 4, StandardCharsets.UTF_8);
     
     // 메시지가 줄바꿈 문자로 종료되는 케이스
-    // return new NullHeaderStrategy();
+    // return new NoOpHeaderStrategy(StandardCharsets.UTF_8);
     
     // HeaderStrategy를 직접 구현한 커스텀 케이스
     // return new YourCustomStrategy();

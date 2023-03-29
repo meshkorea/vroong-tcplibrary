@@ -1,10 +1,10 @@
 package com.vroong.tcp.message.strategy;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.charset.Charset;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+
+import java.io.*;
+import java.nio.charset.Charset;
 
 /**
  * Tcp header handling strategy.
@@ -13,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
  * e.g. when lpadChar='0', headerLength=4, the full message will be
  *      0015hello world
  *      which means the full message length is 15 bytes including the header itself.
- *
  */
 @Slf4j
 public class LengthAwareHeaderStrategy implements HeaderStrategy {
@@ -29,9 +28,10 @@ public class LengthAwareHeaderStrategy implements HeaderStrategy {
   private final int headerLength;
 
   /**
-   * Charset to use when read header
+   * Charset to use when read and write message
    */
-  private final Charset charset;
+  @Setter
+  private Charset charset;
 
   public LengthAwareHeaderStrategy(char lpadStr, int headerLength, Charset charset) {
     this.lpadChar = lpadStr;
@@ -40,9 +40,9 @@ public class LengthAwareHeaderStrategy implements HeaderStrategy {
   }
 
   @Override
-  public byte[] read(InputStream reader) throws IOException {
+  public String read(InputStream input) throws IOException {
     final byte[] header = new byte[headerLength];
-    reader.read(header);
+    input.read(header);
 
     int bodyLength = 0;
     try {
@@ -52,27 +52,27 @@ public class LengthAwareHeaderStrategy implements HeaderStrategy {
     }
 
     final byte[] body = new byte[bodyLength];
-    reader.read(body);
+    input.read(body);
 
-    return body;
+    return new String(body, charset);
   }
 
   @Override
-  public void write(OutputStream writer, byte[] body) throws IOException {
-    final byte[] header = leftPad(body, headerLength);
+  public void write(OutputStream output, String body) throws IOException {
+    final String header = leftPad(body, headerLength);
 
-    writer.write(header);
-    writer.write(body);
-    writer.flush();
+    output.write(header.getBytes(charset));
+    output.write(body.getBytes(charset));
+    output.flush();
   }
 
-  private byte[] leftPad(byte[] body, int headerLength) {
-    String numString = String.valueOf(body.length + headerLength);
+  private String leftPad(String body, int headerLength) {
+    String numString = String.valueOf(body.getBytes(charset).length + headerLength);
     final int padLength = headerLength - numString.length();
     for (int i = 0; i < padLength; i++) {
       numString = lpadChar + numString;
     }
 
-    return numString.getBytes();
+    return numString;
   }
 }
