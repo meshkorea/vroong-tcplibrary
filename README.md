@@ -25,7 +25,9 @@ Spring Boot Version|Java Version|`vroongTcpLibraryVersion`
 ```groovy
 // build.gradle
 dependencies {
-  implementation "com.vroong:vroongtcp-spring-boot-starter:${vroongTcpLibraryVersion}";
+  implementation ("com.vroong:vroongtcp-spring-boot-starter:${vroongTcpLibraryVersion}") {
+    exclude group: 'com.vroong', module: 'vroongtcp-spring-boot-demo'
+  }
 }
 ```
 

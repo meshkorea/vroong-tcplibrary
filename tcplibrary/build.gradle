@@ -2,7 +2,7 @@ plugins {
 	id 'io.freefair.lombok' version '6.3.0'
 }
 
-apply from: '../gradle/publishing.gradle'
+//apply from: '../gradle/publishing.gradle'
 
 def loggers = [
 		'org.slf4j:slf4j-api:1.7.32',
